@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -63,6 +64,12 @@ def generic_admin_base(object_type, relationships=None, related_types=None):
         typedict
     )
     return klass
+
+def get_all_object_types(relationships=settings.RELATIONSHIPS):
+    """
+    Return a list of all object types defined in 'settings.RELATIONSHIPS'.
+    """
+    return sorted(set([object_type for r in relationships for object_type in r]))
 
 def get_related_content(object, object_type, related_type):
     """
@@ -216,6 +223,13 @@ def relations_abstract_base(object_type, relationships=None, related_types=None)
         typedict
     )
     return klass
+
+def is_valid_object_type(object_type, relationships=settings.RELATIONSHIPS):
+    """
+    Return 'True' if the provided object type is defined in 'settings.RELATIONSHIPS'.
+    """
+    if object_type in [object_type for r in relationships for object_type in r]:
+        return True
 
 def validate_and_process_related(object_type, relationships=[], related_types=[]):
     """
