@@ -71,7 +71,7 @@ def get_all_object_types(relationships=settings.RELATIONSHIPS):
     """
     return sorted(set([object_type for r in relationships for object_type in r]))
 
-def get_all_related_content(object, relationships=settings.RELATIONSHIPS):
+def get_all_related_content(object, object_type, relationships=settings.RELATIONSHIPS):
     """
     Return a dictionary of related content for an object. Each key is a
     related type and its value is a list of related content of that type.
@@ -81,12 +81,11 @@ def get_all_related_content(object, relationships=settings.RELATIONSHIPS):
         data_set = DataSet.objects.first()
         get_all_related_content(data_set)
     """
-    object_type = ContentType.objects.get_for_model(object).name
     related_types = validate_and_process_related(object_type, relationships)
 
     related_content = {}
     for rt in related_types:
-        related_content[rt] = get_related_content(object, rt)
+        related_content[rt] = get_related_content(object, object_type, rt)
     return related_content
 
 def get_related_content(object, object_type, related_type):
