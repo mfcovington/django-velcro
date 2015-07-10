@@ -89,19 +89,19 @@ def get_all_related_content(object, relationships=settings.RELATIONSHIPS):
         related_content[rt] = get_related_content(object, rt)
     return related_content
 
-def get_related_content(object, related_type):
+def get_related_content(object, object_type, related_type):
     """
     Return a list of related content (of given related type) for an object.
 
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
-        get_related_content(data_set, 'publications')
+        get_related_content(data_set, 'data', publication')
     """
     content_type = ContentType.objects.get_for_model(object)
     kwargs = {
-        '{}_content_type__pk'.format(content_type.name): content_type.id,
-        '{}_object_id'.format(content_type.name): object.id,
+        '{}_content_type__pk'.format(object_type): content_type.id,
+        '{}_object_id'.format(object_type): object.id,
     }
     relationships = getattr(object,
         'related_{}'.format(related_type)).model.objects.filter(**kwargs)
