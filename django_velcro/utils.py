@@ -71,32 +71,18 @@ def get_all_object_types(relationships=settings.RELATIONSHIPS):
     """
     return sorted(set([object_type for r in relationships for object_type in r]))
 
-def get_all_related_content(object, object_type, relationships=settings.RELATIONSHIPS):
-    """
-    Return a dictionary of related content for an object. Each key is a
-    related type and its value is a list of related content of that type.
-
-    Usage:
-        from data.models import Data
-        data_set = DataSet.objects.first()
-        get_all_related_content(data_set)
-    """
-    related_types = validate_and_process_related(object_type, relationships)
-
-    related_content = {}
-    for rt in related_types:
-        related_content[rt] = get_related_content(object, object_type, rt)
-    return related_content
-
-def get_related_content(object, object_type, *related_types):
+def get_related_content(object, object_type, *related_types,
+    relationships=settings.RELATIONSHIPS):
     """
     Return a dictionary of related content (of given related type(s)) for an
     object. Each key is a related type and its value is a list of related
-    content of that type.
+    content of that type. If no related types are given, related content of
+    all types is returned.
 
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
+        get_related_content(data_set, 'data')                               # all related types
         get_related_content(data_set, 'data', 'publications')               # one related type
         get_related_content(data_set, 'data', 'publications', 'scientists') # two related types
     """
@@ -105,6 +91,9 @@ def get_related_content(object, object_type, *related_types):
         '{}_content_type__pk'.format(object_type): content_type.id,
         '{}_object_id'.format(object_type): object.id,
     }
+
+    if not related_types:
+        related_types = validate_and_process_related(object_type, relationships)
 
     related_content = {}
 
