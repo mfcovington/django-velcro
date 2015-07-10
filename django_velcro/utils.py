@@ -231,7 +231,7 @@ def is_valid_object_type(object_type, relationships=settings.RELATIONSHIPS):
     if object_type in [object_type for r in relationships for object_type in r]:
         return True
 
-def validate_and_process_related(object_type, relationships=[], related_types=[]):
+def validate_and_process_related(object_type, relationships=None, related_types=None):
     """
     Validate that either 'relationships' or 'related_types' has content.
     If 'relationships' is used, extract, sort, and return relevant 'related_types'.
