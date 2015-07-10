@@ -137,7 +137,10 @@ def get_related_content_sametype(object, object_type, *related_types,
                     relationships=relationships)[object_type])
 
     related_content_sametype = list(set(related_content_sametype))
-    related_content_sametype.remove(object)
+
+    if related_content_sametype:
+        related_content_sametype.remove(object)
+
     return related_content_sametype
 
 def get_relationship_inlines(object_type, relationships=None, related_types=None):
