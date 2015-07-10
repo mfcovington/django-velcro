@@ -141,7 +141,8 @@ def get_related_content_sametype(object, object_type, *related_types,
     if related_content_sametype:
         related_content_sametype.remove(object)
 
-    return related_content_sametype
+    return sorted(related_content_sametype,
+        key=lambda x: (type(x).__name__.lower(), x.__str__().lower()))
 
 def get_relationship_inlines(object_type, relationships=None, related_types=None):
     """
