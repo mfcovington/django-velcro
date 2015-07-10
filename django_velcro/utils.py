@@ -91,6 +91,8 @@ def get_all_related_content(object, relationships=settings.RELATIONSHIPS):
 
 def get_related_content(object, related_type):
     """
+    Return a list of related content (of given related type) for an object.
+
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
