@@ -113,6 +113,29 @@ def get_related_content(object, object_type, related_type):
                 type(getattr(x, related_content_object)).__name__.lower(),
                 getattr(x, related_content_object).name.lower()))]
 
+def get_related_content_sametype(object, object_type,
+    relationships=settings.RELATIONSHIPS):
+    """
+    Return a list of related content for an object of the same type as that
+    object. This related content of the same type is retrieved indirectly via
+    mutually-related content of all other related types.
+
+    Usage:
+        from data.models import Data
+        data_set = DataSet.objects.first()
+        get_related_content_sametype(data_set, 'data')
+    """
+    related_content_sametype = []
+    for related_type, related_objects in get_all_related_content(object,
+            object_type, relationships).items():
+        for r in related_objects:
+            related_content_sametype.extend(get_related_content(r,
+                related_type, object_type))
+
+    related_content_sametype = list(set(related_content_sametype))
+    related_content_sametype.remove(object)
+    return related_content_sametype
+
 def get_relationship_inlines(object_type, relationships=None, related_types=None):
     """
     Import relevant relationship inline models for an admin model.
