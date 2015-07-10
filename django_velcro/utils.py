@@ -88,30 +88,38 @@ def get_all_related_content(object, object_type, relationships=settings.RELATION
         related_content[rt] = get_related_content(object, object_type, rt)
     return related_content
 
-def get_related_content(object, object_type, related_type):
+def get_related_content(object, object_type, *related_types):
     """
-    Return a list of related content (of given related type) for an object.
+    Return a dictionary of related content (of given related type(s)) for an
+    object. Each key is a related type and its value is a list of related
+    content of that type.
 
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
-        get_related_content(data_set, 'data', 'publications')
+        get_related_content(data_set, 'data', 'publications')               # one related type
+        get_related_content(data_set, 'data', 'publications', 'scientists') # two related types
     """
     content_type = ContentType.objects.get_for_model(object)
     kwargs = {
         '{}_content_type__pk'.format(object_type): content_type.id,
         '{}_object_id'.format(object_type): object.id,
     }
-    relationships = getattr(object,
-        'related_{}'.format(related_type)).model.objects.filter(**kwargs)
 
-    related_content_object = '{}_content_object'.format(related_type)
+    related_content = {}
 
-    return [getattr(related, related_content_object)
-        for related in sorted(relationships,
-            key=lambda x: (
-                type(getattr(x, related_content_object)).__name__.lower(),
-                getattr(x, related_content_object).name.lower()))]
+    for rt in related_types:
+        relationships = getattr(object,
+            'related_{}'.format(rt)).model.objects.filter(**kwargs)
+        related_content_object = '{}_content_object'.format(rt)
+
+        related_content[rt] = [getattr(related, related_content_object)
+            for related in sorted(relationships,
+                key=lambda x: (
+                    type(getattr(x, related_content_object)).__name__.lower(),
+                    getattr(x, related_content_object).name.lower()))]
+
+    return related_content
 
 def get_related_content_sametype(object, object_type,
     relationships=settings.RELATIONSHIPS):
