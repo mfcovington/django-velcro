@@ -123,11 +123,12 @@ def get_related_content_sametype(object, object_type,
         get_related_content_sametype(data_set, 'data')
     """
     related_content_sametype = []
-    for related_type, related_objects in get_all_related_content(object,
-            object_type, relationships).items():
+    for related_type, related_objects in get_related_content(object,
+            object_type, relationships=relationships).items():
         for r in related_objects:
-            related_content_sametype.extend(get_related_content(r,
-                related_type, object_type))
+            related_content_sametype.extend(
+                get_related_content(r, related_type, object_type,
+                    relationships=relationships)[object_type])
 
     related_content_sametype = list(set(related_content_sametype))
     related_content_sametype.remove(object)
