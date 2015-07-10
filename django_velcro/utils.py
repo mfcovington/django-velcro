@@ -96,7 +96,7 @@ def get_related_content(object, object_type, related_type):
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
-        get_related_content(data_set, 'data', publication')
+        get_related_content(data_set, 'data', 'publications')
     """
     content_type = ContentType.objects.get_for_model(object)
     kwargs = {
