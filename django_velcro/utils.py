@@ -71,17 +71,17 @@ def get_all_object_types(relationships=settings.RELATIONSHIPS):
     """
     return sorted(set([object_type for r in relationships for object_type in r]))
 
-def get_related_content(object, object_type, related_type):
+def get_related_content(object, related_type):
     """
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
-        get_related_content(data_set, 'data', publication')
+        get_related_content(data_set, 'publications')
     """
     content_type = ContentType.objects.get_for_model(object)
     kwargs = {
-        '{}_content_type__pk'.format(object_type): content_type.id,
-        '{}_object_id'.format(object_type): object.id,
+        '{}_content_type__pk'.format(content_type.name): content_type.id,
+        '{}_object_id'.format(content_type.name): object.id,
     }
     relationships = getattr(object,
         'related_{}'.format(related_type)).model.objects.filter(**kwargs)
