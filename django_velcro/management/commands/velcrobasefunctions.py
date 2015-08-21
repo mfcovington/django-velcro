@@ -17,13 +17,18 @@ Dynamic RelationsBase Model
     Function to include in 'models.py'
     ---------------------------------
 
+        from django.conf import settings
+
+
         def relations_base(object_type):
             if 'django_velcro' in settings.INSTALLED_APPS:
                 from django_velcro.utils import relations_abstract_base
-                RelationsBase = relations_abstract_base(object_type)
+                RelationsBase = relations_abstract_base(object_type,
+                    relations=settings.RELATIONS)
             else:
                 RelationsBase = models.Model
             return RelationsBase
+
 
     Usage Example
     -------------
@@ -45,13 +50,18 @@ Dynamic GenericAdminBase Model
     Function to include in 'admin.py'
     ---------------------------------
 
+        from django.conf import settings
+
+
         def admin_base(object_type):
             if 'django_velcro' in settings.INSTALLED_APPS:
                 from django_velcro.utils import generic_admin_base
-                GenericAdminBase = generic_admin_base(object_type)
+                GenericAdminBase = generic_admin_base(object_type,
+                    relations=settings.RELATIONS)
             else:
                 GenericAdminBase = admin.ModelAdmin
             return GenericAdminBase
+
 
     Usage Example
     -------------
