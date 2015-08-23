@@ -26,17 +26,25 @@ def generic_admin_base(object_type, relationships=None, related_types=None):
 
         from django.conf import settings
 
-        if 'django_velcro' in settings.INSTALLED_APPS:
-            from django_velcro.utils import generic_admin_base
-            DataGenericAdminBase = generic_admin_base('data',
-                relationships=settings.VELCRO_RELATIONSHIPS)
-        else:
-            DataGenericAdminBase = admin.ModelAdmin
+
+        def admin_base(object_type):
+            if 'django_velcro' in settings.INSTALLED_APPS:
+                from django_velcro.utils import generic_admin_base
+                GenericAdminBase = generic_admin_base(object_type,
+                    relationships=settings.VELCRO_RELATIONSHIPS)
+            else:
+                GenericAdminBase = admin.ModelAdmin
+            return GenericAdminBase
+
+
+        @admin.register(Data)
+        class DataAdmin(admin_base('data')):
+            pass
 
 
     Equivalent To:
 
-        class DataGenericAdminBase(GenericAdminModelAdmin):
+        class DataAdminBase(GenericAdminModelAdmin):
             inlines = [
                 DataToPublicationsRelationshipInline,
                 DataToScientistsRelationshipInline,
