@@ -91,7 +91,8 @@ def generate_relationship_model(relationship, velcro_metadata):
     for content in map(lambda x: x.lower(), relationship):
         queries = []
         for lim in velcro_metadata[content]:
-            queries.append(models.Q(**lim))
+            queries.append(
+                models.Q(**{k: lim[k] for k in ('app_label', 'model')}))
         limit = reduce(operator.or_, queries, models.Q())
 
         typedict.update({
