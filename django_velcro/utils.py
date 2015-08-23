@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.fields import GenericRelation
@@ -116,7 +118,8 @@ def get_related_content(object, object_type, *related_types,
                     type(getattr(x, related_content_object)).__name__.lower(),
                     getattr(x, related_content_object).__str__().lower()))]
 
-    return related_content
+    return OrderedDict(sorted(related_content.items(),
+        key=lambda t: t[0].lower()))
 
 def get_related_content_sametype(object, object_type, *related_types,
     relationships=settings.VELCRO_RELATIONSHIPS):
