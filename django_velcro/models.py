@@ -7,20 +7,20 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
 
-###################################################
-# RELATIONSHIP CLASS GENERATOR                    #
-###################################################
-# Define CT_LIMITS & RELATIONSHIPS in settings.py #
-###################################################
+#########################################################
+# RELATIONSHIP CLASS GENERATOR                          #
+#########################################################
+# Define VELCRO_METADATA & RELATIONSHIPS in settings.py #
+#########################################################
 
-def generate_relationship_model(relationship, ct_choice_limits):
+def generate_relationship_model(relationship, velcro_metadata):
     """
     Generates a relationship model from a relationship tuple and
     a dictionary with content type limits.
 
     Usage:
 
-        CT_LIMITS = {
+        VELCRO_METADATA = {
             'data': [
                 {
                     'app_label': 'data',
@@ -50,7 +50,7 @@ def generate_relationship_model(relationship, ct_choice_limits):
                 },
             ],
         }
-        generate_relationship_model(('data', 'publications'), CT_LIMITS)
+        generate_relationship_model(('data', 'publications'), VELCRO_METADATA)
 
 
     Equivalent To:
@@ -90,7 +90,7 @@ def generate_relationship_model(relationship, ct_choice_limits):
 
     for content in map(lambda x: x.lower(), relationship):
         queries = []
-        for lim in ct_choice_limits[content]:
+        for lim in velcro_metadata[content]:
             queries.append(models.Q(**lim))
         limit = reduce(operator.or_, queries, models.Q())
 
@@ -116,11 +116,11 @@ def generate_relationship_model(relationship, ct_choice_limits):
     globals()[klass_name] = klass
 
 
-###################################################
-# GENERATE RELATIONSHIP CLASSES                   #
-###################################################
-# Define CT_LIMITS & RELATIONSHIPS in settings.py #
-###################################################
+#########################################################
+# GENERATE RELATIONSHIP CLASSES                         #
+#########################################################
+# Define VELCRO_METADATA & RELATIONSHIPS in settings.py #
+#########################################################
 
 for r in settings.RELATIONSHIPS:
-    generate_relationship_model(r, settings.CT_LIMITS)
+    generate_relationship_model(r, settings.VELCRO_METADATA)
