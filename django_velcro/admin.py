@@ -5,11 +5,11 @@ from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
 
 
-#######################################
-# ADMIN & INLINE CLASS GENERATORS     #
-#######################################
-# Define RELATIONSHIPS in settings.py #
-#######################################
+##############################################
+# ADMIN & INLINE CLASS GENERATORS            #
+##############################################
+# Define VELCRO_RELATIONSHIPS in settings.py #
+##############################################
 
 def import_relationship_model(relationship):
     """
@@ -98,13 +98,13 @@ def generate_and_register_admin_model(relationship):
     admin.site.register(model, klass_name)
 
 
-#######################################
-# GENERATE ADMIN & INLINE CLASSES     #
-#######################################
-# Define RELATIONSHIPS in settings.py #
-#######################################
+##############################################
+# GENERATE ADMIN & INLINE CLASSES            #
+##############################################
+# Define VELCRO_RELATIONSHIPS in settings.py #
+##############################################
 
-for r in settings.RELATIONSHIPS:
+for r in settings.VELCRO_RELATIONSHIPS:
     import_relationship_model(r)
     generate_inline_model(sorted(r))
     generate_inline_model(sorted(r, reverse=True))

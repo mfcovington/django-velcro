@@ -16,7 +16,7 @@ def generic_admin_base(object_type, relationships=None, related_types=None):
 
         # settings.py:
 
-        RELATIONSHIPS = [
+        VELCRO_RELATIONSHIPS = [
             ('data', 'publications'),
             ('data', 'scientists'),
             ('publications', 'scientists'),
@@ -29,7 +29,7 @@ def generic_admin_base(object_type, relationships=None, related_types=None):
         if 'django_velcro' in settings.INSTALLED_APPS:
             from django_velcro.utils import generic_admin_base
             DataGenericAdminBase = generic_admin_base('data',
-                relationships=settings.RELATIONSHIPS)
+                relationships=settings.VELCRO_RELATIONSHIPS)
         else:
             DataGenericAdminBase = admin.ModelAdmin
 
@@ -65,14 +65,14 @@ def generic_admin_base(object_type, relationships=None, related_types=None):
     )
     return klass
 
-def get_all_object_types(relationships=settings.RELATIONSHIPS):
+def get_all_object_types(relationships=settings.VELCRO_RELATIONSHIPS):
     """
-    Return a list of all object types defined in 'settings.RELATIONSHIPS'.
+    Return a list of all object types defined in 'settings.VELCRO_RELATIONSHIPS'.
     """
     return sorted(set([object_type for r in relationships for object_type in r]))
 
 def get_related_content(object, object_type, *related_types,
-    relationships=settings.RELATIONSHIPS):
+    relationships=settings.VELCRO_RELATIONSHIPS):
     """
     Return a dictionary of related content (of given related type(s)) for an
     object. Each key is a related type and its value is a list of related
@@ -111,7 +111,7 @@ def get_related_content(object, object_type, *related_types,
     return related_content
 
 def get_related_content_sametype(object, object_type, *related_types,
-    relationships=settings.RELATIONSHIPS):
+    relationships=settings.VELCRO_RELATIONSHIPS):
     """
     Return a list of related content for an object of the same type as that
     object. This related content of the same type is retrieved indirectly via
@@ -152,7 +152,7 @@ def get_relationship_inlines(object_type, relationships=None, related_types=None
 
         # settings.py:
 
-        RELATIONSHIPS = [
+        VELCRO_RELATIONSHIPS = [
             ('data', 'publications'),
             ('data', 'scientists'),
             ('publications', 'scientists'),
@@ -163,9 +163,9 @@ def get_relationship_inlines(object_type, relationships=None, related_types=None
         @admin.register(Data, DataSet)
         class DataAdmin(GenericAdminModelAdmin):
             if 'django_velcro' in settings.INSTALLED_APPS:
-                from django_velcro.relationships import RELATIONSHIPS
                 from django_velcro.utils import get_relationship_inlines
-                inlines = get_relationship_inlines('data', relationships=RELATIONSHIPS)
+                inlines = get_relationship_inlines('data',
+                    relationships=settings.VELCRO_RELATIONSHIPS)
 
 
     Equivalent To:
@@ -205,7 +205,7 @@ def relations_abstract_base(object_type, relationships=None, related_types=None)
 
         # settings.py:
 
-        RELATIONSHIPS = [
+        VELCRO_RELATIONSHIPS = [
             ('data', 'publications'),
             ('data', 'scientists'),
             ('publications', 'scientists'),
@@ -216,9 +216,9 @@ def relations_abstract_base(object_type, relationships=None, related_types=None)
         from django.conf import settings
 
         if 'django_velcro' in settings.INSTALLED_APPS:
-            from django_velcro.relationships import RELATIONSHIPS
             from django_velcro.utils import relations_abstract_base
-            DataRelationsBase = relations_abstract_base('data', relationships=RELATIONSHIPS)
+            DataRelationsBase = relations_abstract_base('data',
+                relationships=settings.VELCRO_RELATIONSHIPS)
         else:
             DataRelationsBase = models.Model
 
@@ -274,9 +274,9 @@ def relations_abstract_base(object_type, relationships=None, related_types=None)
     )
     return klass
 
-def is_valid_object_type(object_type, relationships=settings.RELATIONSHIPS):
+def is_valid_object_type(object_type, relationships=settings.VELCRO_RELATIONSHIPS):
     """
-    Return 'True' if the provided object type is defined in 'settings.RELATIONSHIPS'.
+    Return 'True' if the provided object type is defined in 'settings.VELCRO_RELATIONSHIPS'.
     """
     if object_type in [object_type for r in relationships for object_type in r]:
         return True

@@ -7,11 +7,11 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
 
-#########################################################
-# RELATIONSHIP CLASS GENERATOR                          #
-#########################################################
-# Define VELCRO_METADATA & RELATIONSHIPS in settings.py #
-#########################################################
+################################################################
+# RELATIONSHIP CLASS GENERATOR                                 #
+################################################################
+# Define VELCRO_METADATA & VELCRO_RELATIONSHIPS in settings.py #
+################################################################
 
 def generate_relationship_model(relationship, velcro_metadata):
     """
@@ -116,11 +116,11 @@ def generate_relationship_model(relationship, velcro_metadata):
     globals()[klass_name] = klass
 
 
-#########################################################
-# GENERATE RELATIONSHIP CLASSES                         #
-#########################################################
-# Define VELCRO_METADATA & RELATIONSHIPS in settings.py #
-#########################################################
+################################################################
+# GENERATE RELATIONSHIP CLASSES                                #
+################################################################
+# Define VELCRO_METADATA & VELCRO_RELATIONSHIPS in settings.py #
+################################################################
 
-for r in settings.RELATIONSHIPS:
+for r in settings.VELCRO_RELATIONSHIPS:
     generate_relationship_model(r, settings.VELCRO_METADATA)

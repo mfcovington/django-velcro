@@ -8,7 +8,8 @@ from django_velcro.utils import (get_all_object_types,
 
 def validate_object_types(object_types):
     """
-    Raise 'Command Error' if a provided object type is not defined in 'settings.RELATIONSHIPS'.
+    Raise 'Command Error' if a provided object type is not defined in
+    'settings.VELCRO_RELATIONSHIPS'.
     """
     for ot in object_types:
         if not is_valid_object_type(ot):
@@ -28,13 +29,14 @@ class Command(BaseCommand):
             object_types = get_all_object_types()
 
         for ot in object_types:
-            base = relations_abstract_base(ot, relationships=settings.RELATIONSHIPS)
+            base = relations_abstract_base(ot,
+                relationships=settings.VELCRO_RELATIONSHIPS)
 
             self.stdout.write("\n[{}]".format(ot))
             self.stdout.write("\n  base model\n  ----------\n  {}".format(base.__name__))
             self.stdout.write("\n  inlines\n  -------\n")
 
-            for r in get_relationship_inlines(ot, relationships=settings.RELATIONSHIPS):
+            for r in get_relationship_inlines(ot, relationships=settings.VELCRO_RELATIONSHIPS):
                 self.stdout.write('  {}'.format(r.__name__))
 
             self.stdout.write("\n")
