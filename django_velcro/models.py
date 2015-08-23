@@ -22,12 +22,32 @@ def generate_relationship_model(relationship, ct_choice_limits):
 
         CT_LIMITS = {
             'data': [
-                {'app_label': 'data', 'model': 'data' },
-                {'app_label': 'data', 'model': 'dataset' },
+                {
+                    'app_label': 'data',
+                    'model': 'data',
+                    'view': 'data:data-detail',
+                    'url_args': ['pk']
+                },
+                {
+                    'app_label': 'data',
+                    'model': 'dataset',
+                    'view': 'data:dataset-detail',
+                    'url_args': ['pk']
+                },
             ],
             'publications': [
-                {'app_label': 'publication', 'model': 'publication' },
-                {'app_label': 'publication', 'model': 'publicationset' },
+                {
+                    'app_label': 'publication',
+                    'model': 'publication',
+                    'view': 'publications:publication-detail',
+                    'url_args': ['pk']
+                },
+                {
+                    'app_label': 'publication',
+                    'model': 'publicationset',
+                    'view': 'publications:publicationset-detail',
+                    'url_args': ['pk']
+                },
             ],
         }
         generate_relationship_model(('data', 'publications'), CT_LIMITS)
