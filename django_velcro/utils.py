@@ -3,7 +3,6 @@ from collections import OrderedDict
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.fields import GenericRelation
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from genericadmin.admin import GenericAdminModelAdmin
@@ -96,20 +95,21 @@ def get_related_content(object, object_type, *related_types,
         get_related_content(data_set, 'data', 'publications')               # one related type
         get_related_content(data_set, 'data', 'publications', 'scientists') # two related types
     """
-    content_type = ContentType.objects.get_for_model(object)
-    kwargs = {
-        '{}_content_type__pk'.format(object_type): content_type.id,
-        '{}_object_id'.format(object_type): object.id,
-    }
-
     if not related_types:
         related_types = validate_and_process_related(object_type, relationships)
 
     related_content = {}
 
+    from importlib import import_module
+
     for rt in related_types:
-        relationships = getattr(object,
-            'related_{}'.format(rt)).model.objects.filter(**kwargs)
+        relationship_class_name = "{}{}Relationship".format(
+            *sorted((object_type.capitalize(), rt.capitalize())))
+        relationship_class = getattr(import_module(".models", package=__package__),
+            relationship_class_name)
+
+        relationships = relationship_class.objects.filter(
+            **{'{}_object_id'.format(object_type): object.id})
         related_content_object = '{}_content_object'.format(rt)
 
         related_content[rt] = [getattr(related, related_content_object)
