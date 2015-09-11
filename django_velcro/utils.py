@@ -134,12 +134,13 @@ def get_related_content_sametype(object, object_type, *related_types,
         get_related_content_sametype(data_set, 'data')               # via all related types
         get_related_content_sametype(data_set, 'data', 'scientists') # via one related type
     """
-    related_content_sametype = []
-    for related_type, related_objects in get_related_content(object,
-            object_type, relationships=relationships).items():
+    if not related_types:
+        related_types = validate_and_process_related(object_type, relationships)
 
-        if related_types and (related_type not in related_types):
-            continue
+    related_content_sametype = []
+
+    for related_type, related_objects in get_related_content(object,
+            object_type, *related_types, relationships=relationships).items():
 
         for r in related_objects:
             related_content_sametype.extend(
