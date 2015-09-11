@@ -81,7 +81,20 @@ def get_all_object_types(relationships=settings.VELCRO_RELATIONSHIPS):
     """
     return sorted(set([object_type for r in relationships for object_type in r]))
 
-def get_related_content(object, object_type, *related_types,
+def get_object_type(object, velcro_metadata=settings.VELCRO_METADATA):
+    """
+    Return the object type for a given object based on Django Velcro metadata.
+    """
+    app_label = object.__class__._meta.app_label.lower()
+    model = object.__class__._meta.object_name.lower()
+
+    for object_type, type_metadata in sorted(velcro_metadata.items()):
+        for model_metadata in type_metadata:
+            if (model_metadata['app_label'] == app_label and
+                    model_metadata['model'] == model):
+                return object_type
+
+def get_related_content(object, *related_types, object_type=None,
     relationships=settings.VELCRO_RELATIONSHIPS):
     """
     Return a dictionary of related content (of given related type(s)) for an
@@ -92,10 +105,13 @@ def get_related_content(object, object_type, *related_types,
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
-        get_related_content(data_set, 'data')                               # all related types
-        get_related_content(data_set, 'data', 'publications')               # one related type
-        get_related_content(data_set, 'data', 'publications', 'scientists') # two related types
+        get_related_content(data_set)                               # all related types
+        get_related_content(data_set, 'publications')               # one related type
+        get_related_content(data_set, 'publications', 'scientists') # two related types
     """
+    if object_type is None:
+        object_type = get_object_type(object)
+
     if not related_types:
         related_types = validate_and_process_related(object_type, relationships)
 
@@ -120,7 +136,7 @@ def get_related_content(object, object_type, *related_types,
     return OrderedDict(sorted(related_content.items(),
         key=lambda t: t[0].lower()))
 
-def get_related_content_sametype(object, object_type, *related_types,
+def get_related_content_sametype(object, *related_types, object_type=None,
     relationships=settings.VELCRO_RELATIONSHIPS):
     """
     Return a list of related content for an object of the same type as that
@@ -131,9 +147,12 @@ def get_related_content_sametype(object, object_type, *related_types,
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
-        get_related_content_sametype(data_set, 'data')               # via all related types
-        get_related_content_sametype(data_set, 'data', 'scientists') # via one related type
+        get_related_content_sametype(data_set)               # via all related types
+        get_related_content_sametype(data_set, 'scientists') # via one related type
     """
+    if object_type is None:
+        object_type = get_object_type(object)
+
     if not related_types:
         related_types = validate_and_process_related(object_type, relationships)
 
