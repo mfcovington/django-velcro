@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from importlib import import_module
 
 from django.conf import settings
 from django.contrib import admin
@@ -100,8 +101,6 @@ def get_related_content(object, object_type, *related_types,
 
     related_content = {}
 
-    from importlib import import_module
-
     for rt in related_types:
         relationship_class_name = "{}{}Relationship".format(
             *sorted((object_type.capitalize(), rt.capitalize())))
@@ -196,8 +195,6 @@ def get_relationship_inlines(object_type, relationships=None, related_types=None
     related_types = validate_and_process_related(object_type, relationships,
         related_types)
 
-    from importlib import import_module
-
     inlines = []
     for related in related_types:
         inline_class_name = '{}To{}RelationshipInline'.format(object_type.capitalize(), related.capitalize())
@@ -261,8 +258,6 @@ def relations_abstract_base(object_type, relationships=None, related_types=None)
         '__module__': __name__,
         'Meta': Meta,
     }
-
-    from importlib import import_module
 
     for related in related_types:
         relationship_class_name = '{}{}Relationship'.format(
