@@ -2,8 +2,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from django_velcro.utils import (get_all_object_types,
-    get_relationship_inlines, is_valid_object_type,
-    relations_abstract_base)
+    get_relationship_inlines, is_valid_object_type)
 
 
 def validate_object_types(object_types):
@@ -29,11 +28,7 @@ class Command(BaseCommand):
             object_types = get_all_object_types()
 
         for ot in object_types:
-            base = relations_abstract_base(ot,
-                relationships=settings.VELCRO_RELATIONSHIPS)
-
             self.stdout.write("\n[{}]".format(ot))
-            self.stdout.write("\n  base model\n  ----------\n  {}".format(base.__name__))
             self.stdout.write("\n  inlines\n  -------\n")
 
             for r in get_relationship_inlines(ot, relationships=settings.VELCRO_RELATIONSHIPS):

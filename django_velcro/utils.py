@@ -3,7 +3,6 @@ from importlib import import_module
 
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from genericadmin.admin import GenericAdminModelAdmin
@@ -224,81 +223,6 @@ def get_relationship_inlines(object_type, relationships=None, related_types=None
         inlines.append(inline_class)
 
     return inlines
-
-def relations_abstract_base(object_type, relationships=None, related_types=None):
-    """
-    Create an abstract base class with generic relations to related content.
-
-    Usage:
-
-        # settings.py:
-
-        VELCRO_RELATIONSHIPS = [
-            ('data', 'publications'),
-            ('data', 'scientists'),
-            ('publications', 'scientists'),
-        ]
-
-        # data/models.py:
-
-        from django.conf import settings
-
-        if 'django_velcro' in settings.INSTALLED_APPS:
-            from django_velcro.utils import relations_abstract_base
-            DataRelationsBase = relations_abstract_base('data',
-                relationships=settings.VELCRO_RELATIONSHIPS)
-        else:
-            DataRelationsBase = models.Model
-
-
-    Equivalent To:
-
-        class DataRelationsBase(models.Model):
-            related_publications = GenericRelation(DataPublicationsRelationship,
-                content_type_field='publications_content_type',
-                object_id_field='publications_object_id',
-                related_query_name='data',
-            )
-            related_scientists = GenericRelation(DataScientistsRelationship,
-                content_type_field='scientists_content_type',
-                object_id_field='scientists_object_id',
-                related_query_name='data',
-            )
-
-            class Meta:
-                abstract = True
-    """
-    related_types = validate_and_process_related(object_type, relationships,
-        related_types)
-
-    class Meta:
-        abstract = True
-
-    typedict = {
-        '__module__': __name__,
-        'Meta': Meta,
-    }
-
-    for related in related_types:
-        relationship_class_name = '{}{}Relationship'.format(
-            *sorted([object_type.capitalize(), related.capitalize()]))
-        relationship_class = getattr(import_module(".models", package=__package__),
-            relationship_class_name)
-
-        typedict['related_{}'.format(related.lower())] = GenericRelation(
-            relationship_class,
-            content_type_field='{}_content_type'.format(related.lower()),
-            object_id_field='{}_object_id'.format(related.lower()),
-            related_query_name=object_type.lower(),
-        )
-
-    klass_name = '{}RelationsBase'.format(object_type.capitalize())
-    klass = type(
-        klass_name,
-        (models.Model,),
-        typedict
-    )
-    return klass
 
 def is_valid_object_type(object_type, relationships=settings.VELCRO_RELATIONSHIPS):
     """
