@@ -85,7 +85,7 @@ def get_object_type(object, velcro_metadata=settings.VELCRO_METADATA):
     Return the object type for a given object based on Django Velcro metadata.
     """
     app_label = object.__class__._meta.app_label.lower()
-    model = object.__class__._meta.object_name.lower()
+    model = object.__class__._meta.object_name
 
     for object_type, type_metadata in sorted(velcro_metadata.items()):
         for model_metadata in type_metadata:

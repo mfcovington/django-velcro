@@ -24,13 +24,13 @@ def generate_relationship_model(relationship, velcro_metadata):
             'data': [
                 {
                     'app_label': 'data',
-                    'model': 'data',
+                    'model': 'Data',
                     'view': 'data:data-detail',
                     'url_args': ['pk']
                 },
                 {
                     'app_label': 'data',
-                    'model': 'dataset',
+                    'model': 'DataSet',
                     'view': 'data:dataset-detail',
                     'url_args': ['pk']
                 },
@@ -38,13 +38,13 @@ def generate_relationship_model(relationship, velcro_metadata):
             'publications': [
                 {
                     'app_label': 'publication',
-                    'model': 'publication',
+                    'model': 'Publication',
                     'view': 'publications:publication-detail',
                     'url_args': ['pk']
                 },
                 {
                     'app_label': 'publication',
-                    'model': 'publicationset',
+                    'model': 'PublicationSet',
                     'view': 'publications:publicationset-detail',
                     'url_args': ['pk']
                 },
@@ -92,7 +92,7 @@ def generate_relationship_model(relationship, velcro_metadata):
         queries = []
         for lim in velcro_metadata[content]:
             queries.append(
-                models.Q(**{k: lim[k] for k in ('app_label', 'model')}))
+                models.Q(**{k: lim[k].lower() for k in ('app_label', 'model')}))
         limit = reduce(operator.or_, queries, models.Q())
 
         typedict.update({
