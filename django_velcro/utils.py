@@ -93,8 +93,8 @@ def get_object_type(object, velcro_metadata=settings.VELCRO_METADATA):
                     model_metadata['model'] == model):
                 return object_type
 
-def get_related_content(object, *related_types, grouped=True, object_type=None,
-    relationships=settings.VELCRO_RELATIONSHIPS):
+def get_related_content(object, *related_types, grouped=True, limit=None,
+    object_type=None, relationships=settings.VELCRO_RELATIONSHIPS):
     """
     Return a dictionary of related content (of given related type(s)) for an
     object. Each key is a related type and its value is a list of related
@@ -102,6 +102,9 @@ def get_related_content(object, *related_types, grouped=True, object_type=None,
     all types is returned.
 
     Optionally, return a flattened list of related objects with 'grouped=False'.
+
+    Related content queries can be restricted using the 'limit' argument.
+    For example, 'limit=500' restricts results to 500 objects per related type.
 
     Usage:
         from data.models import Data
@@ -125,7 +128,7 @@ def get_related_content(object, *related_types, grouped=True, object_type=None,
             relationship_class_name)
 
         relationships = relationship_class.objects.filter(
-            **{'{}_object_id'.format(object_type): object.id})
+            **{'{}_object_id'.format(object_type): object.id})[:limit]
         related_content_object = '{}_content_object'.format(rt)
 
         related_content[rt] = [getattr(related, related_content_object)
