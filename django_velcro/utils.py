@@ -93,13 +93,15 @@ def get_object_type(object, velcro_metadata=settings.VELCRO_METADATA):
                     model_metadata['model'] == model):
                 return object_type
 
-def get_related_content(object, *related_types, object_type=None,
+def get_related_content(object, *related_types, grouped=True, object_type=None,
     relationships=settings.VELCRO_RELATIONSHIPS):
     """
     Return a dictionary of related content (of given related type(s)) for an
     object. Each key is a related type and its value is a list of related
     content of that type. If no related types are given, related content of
     all types is returned.
+
+    Optionally, return a flattened list of related objects with 'grouped=False'.
 
     Usage:
         from data.models import Data
@@ -132,8 +134,14 @@ def get_related_content(object, *related_types, object_type=None,
                     type(getattr(x, related_content_object)).__name__.lower(),
                     getattr(x, related_content_object).__str__().lower()))]
 
-    return OrderedDict(sorted(related_content.items(),
+    related_dict = OrderedDict(sorted(related_content.items(),
         key=lambda t: t[0].lower()))
+
+    if grouped:
+        return related_dict
+    else:
+        related_list = list(related_dict.values())
+        return [item for sublist in related_list for item in sublist]
 
 def get_related_content_sametype(object, *related_types, object_type=None,
     relationships=settings.VELCRO_RELATIONSHIPS):
