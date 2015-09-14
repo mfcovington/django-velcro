@@ -28,7 +28,6 @@ def import_relationship_model(relationship):
 
         import DataPublicationsRelationship
     """
-    from importlib import import_module
     content_1, content_2 = sorted(map(lambda x: x.capitalize(), relationship))
     relationship_class_name = '{}{}Relationship'.format(content_1, content_2)
     relationship_class = getattr(import_module(".models", package=__package__),
