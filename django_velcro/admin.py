@@ -1,8 +1,12 @@
+from importlib import import_module
+
 from django.conf import settings
 from django.contrib import admin
 
 from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
+
+from .utils import get_relationship_inlines
 
 
 ##############################################
@@ -109,3 +113,28 @@ for r in settings.VELCRO_RELATIONSHIPS:
     generate_inline_model(sorted(r))
     generate_inline_model(sorted(r, reverse=True))
     generate_and_register_admin_model(r)
+
+
+#################################################
+# ADD INLINE CLASSES TO REGISTERED ADMIN MODELS #
+# FOR MODELS WITH ENTRIES IN VELCRO_METADATA    #
+#################################################
+# Define VELCRO_METADATA in settings.py         #
+#################################################
+
+for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
+    for model_metadata in object_type_metadata:
+        app_name = model_metadata['app_label']
+        model_name = model_metadata['model']
+
+        model = getattr(import_module('{}.models'.format(app_name),
+            package=__package__), model_name)
+        model_admin = admin.site._registry[model]
+
+        # Combining the newly created inlines w/ previously existing inlines in
+        # any other way, kept causing subsequent inline lists to contain
+        # unrelated inlines from early iterations of the loop.
+        inlines_old = model_admin.inlines
+        inlines = get_relationship_inlines(object_type,
+            relationships=settings.VELCRO_RELATIONSHIPS, related_types=None)
+        model_admin.inlines = inlines_old + inlines
