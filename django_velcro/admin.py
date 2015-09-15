@@ -68,6 +68,8 @@ def generate_inline_model(relationship, tabular=True):
             'ordering': ['{}_content_type'.format(content_2.lower())],
             'model': eval('{}{}Relationship'.format(*sorted(map(lambda x: x.capitalize(), r)))),
             '__module__': __name__,
+            'verbose_name': 'Related {}'.format(content_2).title(),
+            'verbose_name_plural': 'Related {}'.format(content_2).title(),
         }
     )
     globals()[klass_name] = klass
