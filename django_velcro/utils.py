@@ -6,8 +6,6 @@ from django.conf import settings
 from django.contrib import admin
 from django.db import models
 
-from genericadmin.admin import GenericAdminModelAdmin
-
 
 def get_all_object_types(relationships=settings.VELCRO_RELATIONSHIPS):
     """
