@@ -117,12 +117,13 @@ for r in settings.VELCRO_RELATIONSHIPS:
     generate_and_register_admin_model(r)
 
 
-########################################################
-# ADD INHERITANCE FROM GenericAdminModelAdmin TO ADMIN #
-# MODELS FOR MODELS WITH ENTRIES IN VELCRO_METADATA    #
-########################################################
-# Define VELCRO_METADATA in settings.py                #
-########################################################
+###################################################################
+# MODIFY ADMIN MODELS FOR MODELS WITH ENTRIES IN VELCRO_METADATA: #
+# - ADD INHERITANCE FROM GenericAdminModelAdmin                   #
+# - ADD INLINE CLASSES FOR RELATIONSHIP MODELS                    #
+###################################################################
+# Define VELCRO_METADATA in settings.py                           #
+###################################################################
 
 for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
     for model_metadata in object_type_metadata:
@@ -132,38 +133,19 @@ for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
         model = get_model(app_name, model_name)
         orig_model_admin = admin.site._registry[model].__class__
 
+        orig_inlines = orig_model_admin.inlines
+        relationship_inlines = get_relationship_inlines(object_type,
+            relationships=settings.VELCRO_RELATIONSHIPS, related_types=None)
+        inlines = orig_inlines + relationship_inlines
+
         updated_model_admin = type(
             orig_model_admin.__name__,
             (GenericAdminModelAdmin, orig_model_admin),
             {
                 '__module__': __name__,
+                'inlines': inlines,
             }
         )
 
         admin.site.unregister(model)
         admin.site.register(model, updated_model_admin)
-
-
-#################################################
-# ADD INLINE CLASSES TO REGISTERED ADMIN MODELS #
-# FOR MODELS WITH ENTRIES IN VELCRO_METADATA    #
-#################################################
-# Define VELCRO_METADATA in settings.py         #
-#################################################
-
-for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
-    for model_metadata in object_type_metadata:
-        app_name = model_metadata['app_label']
-        model_name = model_metadata['model']
-
-        model = getattr(import_module('{}.models'.format(app_name),
-            package=__package__), model_name)
-        model_admin = admin.site._registry[model]
-
-        # Combining the newly created inlines w/ previously existing inlines in
-        # any other way, kept causing subsequent inline lists to contain
-        # unrelated inlines from early iterations of the loop.
-        inlines_old = model_admin.inlines
-        inlines = get_relationship_inlines(object_type,
-            relationships=settings.VELCRO_RELATIONSHIPS, related_types=None)
-        model_admin.inlines = inlines_old + inlines
