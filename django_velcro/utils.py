@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from importlib import import_module
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib import admin
 from django.db import models
@@ -58,7 +59,7 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
     for rt in related_types:
         relationship_class_name = "{}{}Relationship".format(
             *sorted((object_type.capitalize(), rt.capitalize())))
-        relationship_class = getattr(import_module(".models", package=__package__),
+        relationship_class = apps.get_model(__package__,
             relationship_class_name)
 
         relationships = relationship_class.objects.filter(

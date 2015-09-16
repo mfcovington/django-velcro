@@ -1,8 +1,6 @@
-from importlib import import_module
-
+from django.apps import apps
 from django.conf import settings
 from django.contrib import admin
-from django.db.models.loading import get_model
 
 from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
@@ -31,8 +29,7 @@ def import_relationship_model(relationship):
     """
     content_1, content_2 = sorted(map(lambda x: x.capitalize(), relationship))
     relationship_class_name = '{}{}Relationship'.format(content_1, content_2)
-    relationship_class = getattr(import_module(".models", package=__package__),
-        relationship_class_name)
+    relationship_class = apps.get_model(__package__, relationship_class_name)
     globals()[relationship_class_name] = relationship_class
 
 def generate_inline_model(relationship, tabular=True):
@@ -130,7 +127,7 @@ for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
         app_name = model_metadata['app_label']
         model_name = model_metadata['model']
 
-        model = get_model(app_name, model_name)
+        model = apps.get_model(app_name, model_name)
         orig_model_admin = admin.site._registry[model].__class__
 
         orig_inlines = orig_model_admin.inlines
