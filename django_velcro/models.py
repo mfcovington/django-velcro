@@ -104,6 +104,14 @@ def generate_relationship_model(relationship, velcro_metadata):
                 '{}_content_type'.format(content), '{}_object_id'.format(content)),
         })
 
+    class Meta:
+        unique_together = (
+            '{}_content_type'.format(content_1),
+            '{}_object_id'.format(content_1),
+            '{}_content_type'.format(content_2),
+            '{}_object_id'.format(content_2),
+        )
+
     def __str__(self):
         return '{}: {} ⟷  {}: {}'.format(
             getattr(self, '{}_content_type'.format(content_1)).name.upper(),
@@ -113,6 +121,7 @@ def generate_relationship_model(relationship, velcro_metadata):
         )
 
     typedict['__str__'] = __str__
+    typedict['Meta'] = Meta
     klass = type(klass_name, (models.Model,), typedict)
     globals()[klass_name] = klass
 
