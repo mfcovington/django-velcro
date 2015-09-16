@@ -4,6 +4,7 @@ from importlib import import_module
 from django.apps import apps
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 
@@ -60,8 +61,12 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
         relationship_class = apps.get_model(__package__,
             relationship_class_name)
 
-        relationships = relationship_class.objects.filter(
-            **{'{}_object_id'.format(object_type): object.id})[:limit]
+        content_type = ContentType.objects.get_for_model(object)
+        query = {
+            '{}_object_id'.format(object_type): object.id,
+            '{}_content_type'.format(object_type): content_type,
+        }
+        relationships = relationship_class.objects.filter(**query)[:limit]
         related_content_object = '{}_content_object'.format(rt)
 
         related_content[rt] = [getattr(related, related_content_object)
