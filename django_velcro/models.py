@@ -83,6 +83,30 @@ def generate_relationship_model(relationship, velcro_metadata):
                     self.publications_content_object
                 )
     """
+    class RelationshipBase(models.Model):
+        class Meta:
+            abstract = True
+
+        def save(self, *args, **kwargs):
+            query = {
+                '{}_content_type'.format(content_1):
+                    getattr(self, '{}_content_type'.format(content_1)),
+                '{}_object_id'.format(content_1):
+                    getattr(self, '{}_object_id'.format(content_1)),
+                '{}_content_type'.format(content_2):
+                    getattr(self, '{}_content_type'.format(content_2)),
+                '{}_object_id'.format(content_2):
+                    getattr(self, '{}_object_id'.format(content_2)),
+            }
+            try:
+                relationship = self.__class__.objects.get(**query)
+                self.pk = relationship.pk
+            except:
+                pass
+
+            super().save(*args, **kwargs)
+
+
     content_1, content_2 = sorted(relationship)
     klass_name = '{}{}Relationship'.format(content_1.capitalize(),
         content_2.capitalize())
@@ -122,7 +146,7 @@ def generate_relationship_model(relationship, velcro_metadata):
 
     typedict['__str__'] = __str__
     typedict['Meta'] = Meta
-    klass = type(klass_name, (models.Model,), typedict)
+    klass = type(klass_name, (RelationshipBase,), typedict)
     globals()[klass_name] = klass
 
 
