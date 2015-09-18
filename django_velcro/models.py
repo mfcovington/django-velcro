@@ -7,42 +7,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
 
-class RelationshipBase(models.Model):
-    """
-    Base class for relationship models.
-    """
-    class Meta:
-        abstract = True
-
-    def save(self, *args, **kwargs):
-        query = {
-            '{}_content_type'.format(content_1):
-                getattr(self, '{}_content_type'.format(content_1)),
-            '{}_object_id'.format(content_1):
-                getattr(self, '{}_object_id'.format(content_1)),
-            '{}_content_type'.format(content_2):
-                getattr(self, '{}_content_type'.format(content_2)),
-            '{}_object_id'.format(content_2):
-                getattr(self, '{}_object_id'.format(content_2)),
-        }
-
-        try:
-            relationship = self.__class__.objects.get(**query)
-            self.pk = relationship.pk
-        except:
-            pass
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return '{}: {} ⟷  {}: {}'.format(
-            getattr(self, '{}_content_type'.format(content_1)).name.upper(),
-            getattr(self, '{}_content_object'.format(content_1)),
-            getattr(self, '{}_content_type'.format(content_2)).name.upper(),
-            getattr(self, '{}_content_object'.format(content_2)),
-        )
-
-
 ################################################################
 # RELATIONSHIP CLASS GENERATOR                                 #
 ################################################################
@@ -119,6 +83,42 @@ def generate_relationship_model(relationship, velcro_metadata):
                     self.publications_content_object
                 )
     """
+    class RelationshipBase(models.Model):
+        """
+        Base class for relationship models.
+        """
+        class Meta:
+            abstract = True
+
+        def save(self, *args, **kwargs):
+            query = {
+                '{}_content_type'.format(content_1):
+                    getattr(self, '{}_content_type'.format(content_1)),
+                '{}_object_id'.format(content_1):
+                    getattr(self, '{}_object_id'.format(content_1)),
+                '{}_content_type'.format(content_2):
+                    getattr(self, '{}_content_type'.format(content_2)),
+                '{}_object_id'.format(content_2):
+                    getattr(self, '{}_object_id'.format(content_2)),
+            }
+
+            try:
+                relationship = self.__class__.objects.get(**query)
+                self.pk = relationship.pk
+            except:
+                pass
+
+            super().save(*args, **kwargs)
+
+        def __str__(self):
+            return '{}: {} ⟷  {}: {}'.format(
+                getattr(self, '{}_content_type'.format(content_1)).name.upper(),
+                getattr(self, '{}_content_object'.format(content_1)),
+                getattr(self, '{}_content_type'.format(content_2)).name.upper(),
+                getattr(self, '{}_content_object'.format(content_2)),
+            )
+
+
     content_1, content_2 = sorted(relationship)
     klass_name = '{}{}Relationship'.format(content_1.capitalize(),
         content_2.capitalize())
