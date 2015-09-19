@@ -18,9 +18,7 @@ def add_related_content(object_1, object_2):
     object_1_type = get_object_type(object_1)
     object_2_type = get_object_type(object_2)
 
-    relationship_class_name = "{}{}Relationship".format(
-        *sorted((object_1_type.capitalize(), object_2_type.capitalize())))
-    relationship_class = apps.get_model(__package__, relationship_class_name)
+    relationship_class = get_relationship_class(object_1_type, object_2_type)
 
     query = {
         '{}_content_type'.format(object_1_type):
@@ -81,10 +79,7 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
     related_content = {}
 
     for rt in related_types:
-        relationship_class_name = "{}{}Relationship".format(
-            *sorted((object_type.capitalize(), rt.capitalize())))
-        relationship_class = apps.get_model(__package__,
-            relationship_class_name)
+        relationship_class = get_relationship_class(object_type, rt)
 
         content_type = ContentType.objects.get_for_model(object)
         query = {
@@ -147,6 +142,14 @@ def get_related_content_sametype(object, *related_types, object_type=None,
 
     return sorted(related_content_sametype,
         key=lambda x: (type(x).__name__.lower(), x.__str__().lower()))
+
+def get_relationship_class(object_1_type, object_2_type):
+    """
+    Given two object types, return the corresponding relatiosnhip class.
+    """
+    relationship_class_name = "{}{}Relationship".format(
+        *sorted((object_1_type.capitalize(), object_2_type.capitalize())))
+    return apps.get_model(__package__, relationship_class_name)
 
 def get_relationship_inlines(object_type, relationships=None, related_types=None):
     """
@@ -213,9 +216,7 @@ def remove_related_content(object_1, object_2):
     object_1_type = get_object_type(object_1)
     object_2_type = get_object_type(object_2)
 
-    relationship_class_name = "{}{}Relationship".format(
-        *sorted((object_1_type.capitalize(), object_2_type.capitalize())))
-    relationship_class = apps.get_model(__package__, relationship_class_name)
+    relationship_class = get_relationship_class(object_1_type, object_2_type)
 
     query = {
         '{}_content_type'.format(object_1_type):
