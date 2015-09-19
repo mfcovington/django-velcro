@@ -34,11 +34,11 @@ def add_related_content(object_1, object_2):
 
     return relationship_class.objects.get_or_create(**query)
 
-def get_all_object_types(relationships=settings.VELCRO_RELATIONSHIPS):
+def get_all_object_types():
     """
-    Return a list of all object types defined in 'settings.VELCRO_RELATIONSHIPS'.
+    Return a list of all object types defined in 'settings.VELCRO_METADATA'.
     """
-    return sorted(set([object_type for r in relationships for object_type in r]))
+    return sorted(list(settings.VELCRO_METADATA.keys()))
 
 def get_object_type(object):
     """
@@ -205,11 +205,11 @@ def get_relationship_inlines(object_type, relationships=None, related_types=None
 
     return inlines
 
-def is_valid_object_type(object_type, relationships=settings.VELCRO_RELATIONSHIPS):
+def is_valid_object_type(object_type):
     """
-    Return 'True' if the provided object type is defined in 'settings.VELCRO_RELATIONSHIPS'.
+    Return 'True' if the provided object type is defined in 'settings.VELCRO_METADATA'.
     """
-    if object_type in [object_type for r in relationships for object_type in r]:
+    if object_type in settings.VELCRO_METADATA.keys():
         return True
 
 def remove_related_content(object_1, object_2):
