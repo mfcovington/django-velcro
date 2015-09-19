@@ -98,7 +98,7 @@ def generate_and_register_admin_model(relationship):
     globals()[klass_name] = klass
 
     model = eval('{}{}Relationship'.format(content_1, content_2))
-    admin.site.register(model, klass_name)
+    admin.site.register(model, klass)
 
 
 ##############################################
