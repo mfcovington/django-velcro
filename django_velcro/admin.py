@@ -93,6 +93,7 @@ def generate_and_register_admin_model(relationship):
         (GenericAdminModelAdmin,),
         {
             '__module__': __name__,
+            'readonly_fields': ['order_by'],
         }
     )
     globals()[klass_name] = klass

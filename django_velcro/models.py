@@ -89,6 +89,7 @@ def generate_relationship_model(relationship, velcro_metadata):
         """
         class Meta:
             abstract = True
+            ordering = ['order_by']
 
         def save(self, *args, **kwargs):
             query = {
@@ -108,6 +109,8 @@ def generate_relationship_model(relationship, velcro_metadata):
             except:
                 pass
 
+            self.order_by = self.__str__()
+
             super().save(*args, **kwargs)
 
         def __str__(self):
@@ -122,7 +125,10 @@ def generate_relationship_model(relationship, velcro_metadata):
     content_1, content_2 = sorted(relationship)
     klass_name = '{}{}Relationship'.format(content_1.capitalize(),
         content_2.capitalize())
-    typedict = {'__module__': __name__,}
+    typedict = {
+        '__module__': __name__,
+        'order_by': models.CharField(max_length=255, blank=True)
+    }
 
     for content in map(lambda x: x.lower(), relationship):
         queries = []
