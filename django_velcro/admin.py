@@ -63,7 +63,14 @@ def generate_inline_model(relationship, tabular=True):
         {
             'ct_field': '{}_content_type'.format(content_1.lower()),
             'ct_fk_field': '{}_object_id'.format(content_1.lower()),
-            'ordering': ['{}_content_type'.format(content_2.lower())],
+            'fields': [
+                '{}_content_type'.format(content_2.lower()),
+                '{}_object_id'.format(content_2.lower()),
+            ],
+            'ordering': [
+                '{}_content_type'.format(content_2.lower()),
+                'order_by',
+            ],
             'model': eval('{}{}Relationship'.format(*sorted(map(lambda x: x.capitalize(), r)))),
             '__module__': __name__,
             'verbose_name': 'Related {}'.format(content_2).title(),
