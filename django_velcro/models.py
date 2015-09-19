@@ -13,10 +13,9 @@ from django.db import models
 # Define VELCRO_METADATA & VELCRO_RELATIONSHIPS in settings.py #
 ################################################################
 
-def generate_relationship_model(relationship, velcro_metadata):
+def generate_relationship_model(relationship):
     """
-    Generates a relationship model from a relationship tuple and
-    a dictionary with content type limits.
+    Generates a relationship model from a relationship tuple.
 
     Usage:
 
@@ -50,7 +49,7 @@ def generate_relationship_model(relationship, velcro_metadata):
                 },
             ],
         }
-        generate_relationship_model(('data', 'publications'), VELCRO_METADATA)
+        generate_relationship_model(('data', 'publications'))
 
 
     Equivalent To:
@@ -132,7 +131,7 @@ def generate_relationship_model(relationship, velcro_metadata):
 
     for content in map(lambda x: x.lower(), relationship):
         queries = []
-        for lim in velcro_metadata[content]:
+        for lim in settings.VELCRO_METADATA[content]:
             queries.append(
                 models.Q(**{k: lim[k].lower() for k in ('app_label', 'model')}))
         limit = reduce(operator.or_, queries, models.Q())
@@ -157,4 +156,4 @@ def generate_relationship_model(relationship, velcro_metadata):
 ################################################################
 
 for r in settings.VELCRO_RELATIONSHIPS:
-    generate_relationship_model(r, settings.VELCRO_METADATA)
+    generate_relationship_model(r)

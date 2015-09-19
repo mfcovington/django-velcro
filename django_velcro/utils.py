@@ -40,14 +40,14 @@ def get_all_object_types(relationships=settings.VELCRO_RELATIONSHIPS):
     """
     return sorted(set([object_type for r in relationships for object_type in r]))
 
-def get_object_type(object, velcro_metadata=settings.VELCRO_METADATA):
+def get_object_type(object):
     """
     Return the object type for a given object based on Django Velcro metadata.
     """
     app_label = object.__class__._meta.app_label.lower()
     model = object.__class__._meta.object_name
 
-    for object_type, type_metadata in sorted(velcro_metadata.items()):
+    for object_type, type_metadata in sorted(settings.VELCRO_METADATA.items()):
         for model_metadata in type_metadata:
             if (model_metadata['app_label'] == app_label and
                     model_metadata['model'] == model):
