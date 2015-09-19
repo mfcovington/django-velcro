@@ -8,6 +8,16 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 
+def _relationship_query(object_1, object_1_type, object_2, object_2_type):
+    return {
+        '{}_content_type'.format(object_1_type):
+            ContentType.objects.get_for_model(object_1),
+        '{}_object_id'.format(object_1_type): object_1.id,
+        '{}_content_type'.format(object_2_type):
+            ContentType.objects.get_for_model(object_2),
+        '{}_object_id'.format(object_2_type): object_2.id,
+    }
+
 def add_related_content(object_1, object_2):
     """
     Get or create a relationship between two objects.
@@ -19,15 +29,8 @@ def add_related_content(object_1, object_2):
     object_2_type = get_object_type(object_2)
 
     relationship_class = get_relationship_class(object_1_type, object_2_type)
-
-    query = {
-        '{}_content_type'.format(object_1_type):
-            ContentType.objects.get_for_model(object_1),
-        '{}_object_id'.format(object_1_type): object_1.id,
-        '{}_content_type'.format(object_2_type):
-            ContentType.objects.get_for_model(object_2),
-        '{}_object_id'.format(object_2_type): object_2.id,
-    }
+    query = _relationship_query(object_1, object_1_type, object_2,
+        object_2_type)
 
     return relationship_class.objects.get_or_create(**query)
 
@@ -217,15 +220,8 @@ def remove_related_content(object_1, object_2):
     object_2_type = get_object_type(object_2)
 
     relationship_class = get_relationship_class(object_1_type, object_2_type)
-
-    query = {
-        '{}_content_type'.format(object_1_type):
-            ContentType.objects.get_for_model(object_1),
-        '{}_object_id'.format(object_1_type): object_1.id,
-        '{}_content_type'.format(object_2_type):
-            ContentType.objects.get_for_model(object_2),
-        '{}_object_id'.format(object_2_type): object_2.id,
-    }
+    query = _relationship_query(object_1, object_1_type, object_2,
+        object_2_type)
 
     relationship_class.objects.get(**query).delete()
 
