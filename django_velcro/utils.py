@@ -8,6 +8,31 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 
+def add_related_content(object_1, object_2):
+    """
+    Get or create a relationship between two objects.
+
+    Returns the relationship object and a boolean indicating whether
+    the relationship was created.
+    """
+    object_1_type = get_object_type(object_1)
+    object_2_type = get_object_type(object_2)
+
+    relationship_class_name = "{}{}Relationship".format(
+        *sorted((object_1_type.capitalize(), object_2_type.capitalize())))
+    relationship_class = apps.get_model(__package__, relationship_class_name)
+
+    query = {
+        '{}_content_type'.format(object_1_type):
+            ContentType.objects.get_for_model(object_1),
+        '{}_object_id'.format(object_1_type): object_1.id,
+        '{}_content_type'.format(object_2_type):
+            ContentType.objects.get_for_model(object_2),
+        '{}_object_id'.format(object_2_type): object_2.id,
+    }
+
+    return relationship_class.objects.get_or_create(**query)
+
 def get_all_object_types(relationships=settings.VELCRO_RELATIONSHIPS):
     """
     Return a list of all object types defined in 'settings.VELCRO_RELATIONSHIPS'.
@@ -180,6 +205,28 @@ def is_valid_object_type(object_type, relationships=settings.VELCRO_RELATIONSHIP
     """
     if object_type in [object_type for r in relationships for object_type in r]:
         return True
+
+def remove_related_content(object_1, object_2):
+    """
+    Delete a relationship between two objects.
+    """
+    object_1_type = get_object_type(object_1)
+    object_2_type = get_object_type(object_2)
+
+    relationship_class_name = "{}{}Relationship".format(
+        *sorted((object_1_type.capitalize(), object_2_type.capitalize())))
+    relationship_class = apps.get_model(__package__, relationship_class_name)
+
+    query = {
+        '{}_content_type'.format(object_1_type):
+            ContentType.objects.get_for_model(object_1),
+        '{}_object_id'.format(object_1_type): object_1.id,
+        '{}_content_type'.format(object_2_type):
+            ContentType.objects.get_for_model(object_2),
+        '{}_object_id'.format(object_2_type): object_2.id,
+    }
+
+    relationship_class.objects.get(**query).delete()
 
 def validate_and_process_related(object_type, relationships=None, related_types=None):
     """
