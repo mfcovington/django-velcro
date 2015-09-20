@@ -14,6 +14,30 @@ from .utils import get_relationship_inlines
 # Define VELCRO_RELATIONSHIPS in settings.py #
 ##############################################
 
+def add_velcro_to_third_party_admin(app_name, model_name, object_type):
+    """
+    Update third party admin models with inline classes for relationships
+    and inheritance from 'GenericAdminModelAdmin'.
+    """
+    model = apps.get_model(app_name, model_name)
+    orig_model_admin = admin.site._registry[model].__class__
+
+    orig_inlines = orig_model_admin.inlines
+    relationship_inlines = get_relationship_inlines(object_type)
+    inlines = orig_inlines + relationship_inlines
+
+    updated_model_admin = type(
+        orig_model_admin.__name__,
+        (GenericAdminModelAdmin, orig_model_admin),
+        {
+            '__module__': __name__,
+            'inlines': inlines,
+        }
+    )
+
+    admin.site.unregister(model)
+    admin.site.register(model, updated_model_admin)
+
 def import_relationship_model(relationship):
     """
     Imports a relationship model.
@@ -137,23 +161,4 @@ for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
     for model_metadata in object_type_metadata:
         app_name = model_metadata['app_label']
         model_name = model_metadata['model']
-
-        model = apps.get_model(app_name, model_name)
-        orig_model_admin = admin.site._registry[model].__class__
-
-        orig_inlines = orig_model_admin.inlines
-        relationship_inlines = get_relationship_inlines(object_type,
-            related_types=None)
-        inlines = orig_inlines + relationship_inlines
-
-        updated_model_admin = type(
-            orig_model_admin.__name__,
-            (GenericAdminModelAdmin, orig_model_admin),
-            {
-                '__module__': __name__,
-                'inlines': inlines,
-            }
-        )
-
-        admin.site.unregister(model)
-        admin.site.register(model, updated_model_admin)
+        add_velcro_to_third_party_admin(app_name, model_name, object_type)
