@@ -1,6 +1,7 @@
 from django import template
-from django.conf import settings
 from django.core.urlresolvers import reverse
+
+from .settings import VELCRO_METADATA
 
 
 register = template.Library()
@@ -22,7 +23,7 @@ def velcro_url(context, object=None, object_type=None):
     if object_type == None:
         object_type = context['object_type']
 
-    object_type_metadata = settings.VELCRO_METADATA[object_type]
+    object_type_metadata = VELCRO_METADATA[object_type]
     model_metadata = find_dict_in_list(object_type_metadata, 'model',
         object.__class__.__name__)
     view = model_metadata['view']

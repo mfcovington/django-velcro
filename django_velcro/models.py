@@ -1,17 +1,18 @@
 import operator
 from functools import reduce
 
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
+
+from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS
 
 
 def _startup():
     """
     Generate relationship classes.
     """
-    for r in settings.VELCRO_RELATIONSHIPS:
+    for r in VELCRO_RELATIONSHIPS:
         generate_relationship_model(r)
 
 def generate_relationship_model(relationship):
@@ -158,7 +159,7 @@ def generate_relationship_model(relationship):
 
     for content in map(lambda x: x.lower(), relationship):
         queries = []
-        for lim in settings.VELCRO_METADATA[content]:
+        for lim in VELCRO_METADATA[content]:
             queries.append(
                 models.Q(**{k: lim[k].lower() for k in ('app_label', 'model')}))
         limit = reduce(operator.or_, queries, models.Q())

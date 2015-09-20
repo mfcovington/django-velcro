@@ -2,10 +2,11 @@ from collections import OrderedDict
 from importlib import import_module
 
 from django.apps import apps
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+
+from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS
 
 
 def _relationship_query(object_1, object_1_type, object_2, object_2_type):
@@ -41,7 +42,7 @@ def get_all_object_types():
     """
     Return a list of all object types defined in 'settings.VELCRO_METADATA'.
     """
-    return sorted(list(settings.VELCRO_METADATA.keys()))
+    return sorted(list(VELCRO_METADATA.keys()))
 
 def get_object_type(object):
     """
@@ -50,7 +51,7 @@ def get_object_type(object):
     app_label = object.__class__._meta.app_label.lower()
     model = object.__class__._meta.object_name
 
-    for object_type, type_metadata in sorted(settings.VELCRO_METADATA.items()):
+    for object_type, type_metadata in sorted(VELCRO_METADATA.items()):
         for model_metadata in type_metadata:
             if (model_metadata['app_label'] == app_label and
                     model_metadata['model'] == model):
@@ -162,7 +163,7 @@ def get_related_types(object_type):
     Given an object type, return all related types.
     """
     related_types = []
-    for r in settings.VELCRO_RELATIONSHIPS:
+    for r in VELCRO_RELATIONSHIPS:
         if object_type in r:
             related_types.extend([related for related in r
                 if related != object_type])
@@ -199,7 +200,7 @@ def is_valid_object_type(object_type):
     Return 'True' if the provided object type is defined in
     'settings.VELCRO_METADATA'.
     """
-    if object_type in settings.VELCRO_METADATA.keys():
+    if object_type in VELCRO_METADATA.keys():
         return True
 
 def remove_related_content(object_1, object_2):

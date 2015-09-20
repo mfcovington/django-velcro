@@ -1,10 +1,10 @@
 from django.apps import apps
-from django.conf import settings
 from django.contrib import admin
 
 from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
 
+from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS
 from .utils import get_relationship_inlines
 
 
@@ -14,14 +14,14 @@ def _startup():
     models  with inline classes for relationships and inheritance from
     'GenericAdminModelAdmin'.
     """
-    for r in settings.VELCRO_RELATIONSHIPS:
+    for r in VELCRO_RELATIONSHIPS:
         import_relationship_model(r)
         # Add default: settings.VELCRO_TABULAR_INLINE = True
         generate_inline_model(sorted(r))
         generate_inline_model(sorted(r, reverse=True))
         generate_and_register_admin_model(r)
 
-    for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
+    for object_type, object_type_metadata in VELCRO_METADATA.items():
         for model_metadata in object_type_metadata:
             app_name = model_metadata['app_label']
             model_name = model_metadata['model']
