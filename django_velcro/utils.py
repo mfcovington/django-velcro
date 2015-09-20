@@ -9,6 +9,9 @@ from django.db import models
 
 
 def _relationship_query(object_1, object_1_type, object_2, object_2_type):
+    """
+    Return a dict for making relationship object queries.
+    """
     return {
         '{}_content_type'.format(object_1_type):
             ContentType.objects.get_for_model(object_1),
@@ -130,6 +133,7 @@ def get_related_content_sametype(object, *related_types, object_type=None):
         data_set = DataSet.objects.first()
         get_related_content_sametype(data_set)               # via all related types
         get_related_content_sametype(data_set, 'scientists') # via one related type
+        get_related_content_sametype(data_set, 't1', 't2')   # via two related types
     """
     if object_type is None:
         object_type = get_object_type(object)
@@ -166,7 +170,8 @@ def get_related_types(object_type):
 
 def get_relationship_class(object_1_type, object_2_type):
     """
-    Given two object types, return the corresponding relatiosnhip class.
+    Given two object types, import and return the corresponding relationship
+    class.
     """
     relationship_class_name = "{}{}Relationship".format(
         *sorted((object_1_type.capitalize(), object_2_type.capitalize())))
@@ -174,41 +179,8 @@ def get_relationship_class(object_1_type, object_2_type):
 
 def get_relationship_inlines(object_type, related_types=None):
     """
-    Import relevant relationship inline models for an admin model.
-
-    Usage:
-
-        # settings.py:
-
-        VELCRO_RELATIONSHIPS = [
-            ('data', 'publications'),
-            ('data', 'scientists'),
-            ('publications', 'scientists'),
-        ]
-
-        # data/admin.py:
-
-        @admin.register(Data, DataSet)
-        class DataAdmin(GenericAdminModelAdmin):
-            if 'django_velcro' in settings.INSTALLED_APPS:
-                from django_velcro.utils import get_relationship_inlines
-                inlines = get_relationship_inlines('data',
-                    relationships=settings.VELCRO_RELATIONSHIPS)
-
-
-    Equivalent To:
-
-        # data/admin.py:
-
-        from django_velcro.admin import (DataToPublicationsRelationshipInline,
-            DataToScientistsRelationshipInline)
-
-        @admin.register(Data, DataSet)
-        class DataAdmin(GenericAdminModelAdmin):
-            inlines = [
-                DataToPublicationsRelationshipInline,
-                DataToScientistsRelationshipInline
-            ]
+    Given an object type and, optionally, a list of related types, import
+    and return all relevant relationship inline models for an admin model.
     """
     related_types = get_or_validate_related_types(object_type, related_types)
     inlines = []
@@ -224,7 +196,8 @@ def get_relationship_inlines(object_type, related_types=None):
 
 def is_valid_object_type(object_type):
     """
-    Return 'True' if the provided object type is defined in 'settings.VELCRO_METADATA'.
+    Return 'True' if the provided object type is defined in
+    'settings.VELCRO_METADATA'.
     """
     if object_type in settings.VELCRO_METADATA.keys():
         return True

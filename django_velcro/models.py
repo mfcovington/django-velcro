@@ -19,6 +19,7 @@ def generate_relationship_model(relationship):
 
     Usage:
 
+        # settings.py:
         VELCRO_METADATA = {
             'data': [
                 {
@@ -49,6 +50,8 @@ def generate_relationship_model(relationship):
                 },
             ],
         }
+
+        # models.py
         generate_relationship_model(('data', 'publications'))
 
 
@@ -73,6 +76,29 @@ def generate_relationship_model(relationship):
             publications_object_id = models.PositiveIntegerField()
             publications_content_object = GenericForeignKey(
                 'publications_content_type', 'publications_object_id')
+
+            order_by = models.CharField(max_length=255, blank=True)
+
+            class Meta:
+                ordering = ['order_by']
+
+            def save(self, *args, **kwargs):
+                query = {
+                    'data_content_type': self.data_content_type,
+                    'data_object_id': self.data_object_id,
+                    'publications_content_type': self.publications_content_type,
+                    'publications_object_id': self.publications_object_id,
+                }
+
+                try:
+                    relationship = self.__class__.objects.get(**query)
+                    self.pk = relationship.pk
+                except:
+                    pass
+
+                self.order_by = self.__str__()
+
+                super().save(*args, **kwargs)
 
             def __str__(self):
                 return '{}: {} ⟷  {}: {}'.format(

@@ -47,7 +47,10 @@ def generate_inline_model(relationship, tabular=True):
             model = DataPublicationsRelationship
             ct_field = 'data_content_type'
             ct_fk_field = 'data_object_id'
-            ordering = ['publications_content_type']
+            fields = ['publications_content_type', 'publications_object_id']
+            ordering = ['publications_content_type', 'order_by']
+            verbose_name = 'Related Publications'
+            verbose_name_plural = 'Related Publications'
     """
     content_1, content_2 = relationship
     klass_name = '{}To{}RelationshipInline'.format(content_1.capitalize(), content_2.capitalize())
@@ -90,7 +93,7 @@ def generate_and_register_admin_model(relationship):
     Equivalent To:
 
         class DataPublicationsAdmin(GenericAdminModelAdmin):
-            pass
+            readonly_fields = ['order_by']
         admin.site.register(DataPublicationsRelationship, DataPublicationsAdmin)
     """
     content_1, content_2 = sorted(map(lambda x: x.capitalize(), relationship))

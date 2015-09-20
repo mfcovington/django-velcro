@@ -7,7 +7,7 @@ from django_velcro.utils import (get_all_object_types,
 def validate_object_types(object_types):
     """
     Raise 'Command Error' if a provided object type is not defined in
-    'settings.VELCRO_RELATIONSHIPS'.
+    'settings.VELCRO_METADATA'.
     """
     for ot in object_types:
         if not is_valid_object_type(ot):
