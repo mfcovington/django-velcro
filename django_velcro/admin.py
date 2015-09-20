@@ -140,7 +140,7 @@ for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
 
         orig_inlines = orig_model_admin.inlines
         relationship_inlines = get_relationship_inlines(object_type,
-            relationships=settings.VELCRO_RELATIONSHIPS, related_types=None)
+            related_types=None)
         inlines = orig_inlines + relationship_inlines
 
         updated_model_admin = type(

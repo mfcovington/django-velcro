@@ -53,8 +53,21 @@ def get_object_type(object):
                     model_metadata['model'] == model):
                 return object_type
 
+def get_or_validate_related_types(object_type, related_types=None):
+    """
+    Given an object type, return all related types.
+    Given an object type and a list of related types, return a list of the
+    valid related types.
+    """
+    if related_types:
+        related_types = validate_related_types(object_type, related_types)
+    else:
+        related_types = get_related_types(object_type)
+
+    return related_types
+
 def get_related_content(object, *related_types, grouped=True, limit=None,
-    object_type=None, relationships=settings.VELCRO_RELATIONSHIPS):
+    object_type=None):
     """
     Return a dictionary of related content (of given related type(s)) for an
     object. Each key is a related type and its value is a list of related
@@ -76,9 +89,7 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
     if object_type is None:
         object_type = get_object_type(object)
 
-    if not related_types:
-        related_types = validate_and_process_related(object_type, relationships)
-
+    related_types = get_or_validate_related_types(object_type, related_types)
     related_content = {}
 
     for rt in related_types:
@@ -107,8 +118,7 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
         related_list = list(related_dict.values())
         return [item for sublist in related_list for item in sublist]
 
-def get_related_content_sametype(object, *related_types, object_type=None,
-    relationships=settings.VELCRO_RELATIONSHIPS):
+def get_related_content_sametype(object, *related_types, object_type=None):
     """
     Return a list of related content for an object of the same type as that
     object. This related content of the same type is retrieved indirectly via
@@ -124,19 +134,16 @@ def get_related_content_sametype(object, *related_types, object_type=None,
     if object_type is None:
         object_type = get_object_type(object)
 
-    if not related_types:
-        related_types = validate_and_process_related(object_type, relationships)
-
+    related_types = get_or_validate_related_types(object_type, related_types)
     related_content_sametype = []
 
     for related_type, related_objects in get_related_content(object,
-            *related_types, object_type=object_type,
-            relationships=relationships).items():
+            *related_types, object_type=object_type).items():
 
         for r in related_objects:
             related_content_sametype.extend(
-                get_related_content(r, object_type, object_type=related_type,
-                    relationships=relationships)[object_type])
+                get_related_content(r, object_type,
+                    object_type=related_type)[object_type])
 
     related_content_sametype = list(set(related_content_sametype))
 
@@ -146,6 +153,17 @@ def get_related_content_sametype(object, *related_types, object_type=None,
     return sorted(related_content_sametype,
         key=lambda x: (type(x).__name__.lower(), x.__str__().lower()))
 
+def get_related_types(object_type):
+    """
+    Given an object type, return all related types.
+    """
+    related_types = []
+    for r in settings.VELCRO_RELATIONSHIPS:
+        if object_type in r:
+            related_types.extend([related for related in r
+                if related != object_type])
+    return sorted(related_types)
+
 def get_relationship_class(object_1_type, object_2_type):
     """
     Given two object types, return the corresponding relatiosnhip class.
@@ -154,7 +172,7 @@ def get_relationship_class(object_1_type, object_2_type):
         *sorted((object_1_type.capitalize(), object_2_type.capitalize())))
     return apps.get_model(__package__, relationship_class_name)
 
-def get_relationship_inlines(object_type, relationships=None, related_types=None):
+def get_relationship_inlines(object_type, related_types=None):
     """
     Import relevant relationship inline models for an admin model.
 
@@ -192,10 +210,9 @@ def get_relationship_inlines(object_type, relationships=None, related_types=None
                 DataToScientistsRelationshipInline
             ]
     """
-    related_types = validate_and_process_related(object_type, relationships,
-        related_types)
-
+    related_types = get_or_validate_related_types(object_type, related_types)
     inlines = []
+
     for related in related_types:
         inline_class_name = '{}To{}RelationshipInline'.format(object_type.capitalize(), related.capitalize())
         inline_class = getattr(import_module('.admin', package=__package__),
@@ -225,26 +242,28 @@ def remove_related_content(object_1, object_2):
 
     relationship_class.objects.get(**query).delete()
 
-def validate_and_process_related(object_type, relationships=None, related_types=None):
+def validate_related_types(object_type, related_types):
     """
-    Validate that either 'relationships' or 'related_types' has content.
-    If 'relationships' is used, extract, sort, and return relevant 'related_types'.
-    If 'related_types' is used, return contents in their original order.
+    Given an object type and a list of related types, return a list of the
+    valid related types.
     """
-    if relationships is None:
-        relationships = []
+    all_related_types = get_related_types(object_type)
+    valid_related_types = []
+    errors = []
 
-    if related_types is None:
-        related_types = []
+    for rt in related_types[:]:
+        if not is_valid_object_type(rt):
+            errors.append("'{}' is not a valid object type.".format(rt))
+        elif rt not in all_related_types:
+            errors.append("'{}' is not a related object type for '{}'.".format(
+                rt, object_type))
+        elif rt in valid_related_types:
+            errors.append("'{}' is a valid related object type, but occurs " \
+                "multiple times.".format(rt, object_type))
+        else:
+            valid_related_types.append(rt)
 
-    if (relationships and related_types) or (not relationships and not related_types):
-        raise ValueError("Either 'relationships' or 'related_types' must be defined.")
+    for e in set(errors):
+        print('Warning: {}'.format(e))
 
-    if relationships:
-        for r in relationships:
-            if object_type in r:
-                related_types.extend([related for related in r
-                    if related != object_type])
-        related_types = sorted(related_types)
-
-    return related_types
+    return valid_related_types

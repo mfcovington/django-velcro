@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from django_velcro.utils import (get_all_object_types,
@@ -31,7 +30,7 @@ class Command(BaseCommand):
             self.stdout.write("\n[{}]".format(ot))
             self.stdout.write("\n  inlines\n  -------\n")
 
-            for r in get_relationship_inlines(ot, relationships=settings.VELCRO_RELATIONSHIPS):
+            for r in get_relationship_inlines(ot):
                 self.stdout.write('  {}'.format(r.__name__))
 
             self.stdout.write("\n")
