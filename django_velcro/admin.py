@@ -4,7 +4,7 @@ from django.contrib import admin
 from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
 
-from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS
+from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS, VELCRO_TABULAR_INLINE
 from .utils import get_relationship_inlines
 
 
@@ -16,7 +16,6 @@ def _startup():
     """
     for r in VELCRO_RELATIONSHIPS:
         import_relationship_model(r)
-        # Add default: settings.VELCRO_TABULAR_INLINE = True
         generate_inline_model(sorted(r))
         generate_inline_model(sorted(r, reverse=True))
         generate_and_register_admin_model(r)
@@ -69,9 +68,10 @@ def import_relationship_model(relationship):
     relationship_class = apps.get_model(__package__, relationship_class_name)
     globals()[relationship_class_name] = relationship_class
 
-def generate_inline_model(relationship, tabular=True):
+def generate_inline_model(relationship, tabular=VELCRO_TABULAR_INLINE):
     """
     Generates a tabular inline model from a relationship tuple.
+    For a stacked inline model, add 'VELCRO_TABULAR_INLINE = False' to settings.
 
     Usage:
 
