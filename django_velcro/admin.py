@@ -98,7 +98,8 @@ def generate_inline_model(relationship, tabular=True):
                 '{}_content_type'.format(content_2.lower()),
                 'order_by',
             ],
-            'model': eval('{}{}Relationship'.format(*sorted(map(lambda x: x.capitalize(), r)))),
+            'model': eval('{}{}Relationship'.format(
+                *sorted(map(lambda x: x.capitalize(), relationship)))),
             '__module__': __name__,
             'verbose_name': 'Related {}'.format(content_2).title(),
             'verbose_name_plural': 'Related {}'.format(content_2).title(),
