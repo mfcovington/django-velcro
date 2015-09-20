@@ -1,7 +1,7 @@
 from django import template
 from django.core.urlresolvers import reverse
 
-from .settings import VELCRO_METADATA
+from django_velcro.settings import VELCRO_METADATA
 
 
 register = template.Library()
