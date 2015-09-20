@@ -8,11 +8,24 @@ from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
 from .utils import get_relationship_inlines
 
 
-##############################################
-# ADMIN & INLINE CLASS GENERATORS            #
-##############################################
-# Define VELCRO_RELATIONSHIPS in settings.py #
-##############################################
+def _startup():
+    """
+    Generate velcro admin and inline classes. Update third party admin
+    models  with inline classes for relationships and inheritance from
+    'GenericAdminModelAdmin'.
+    """
+    for r in settings.VELCRO_RELATIONSHIPS:
+        import_relationship_model(r)
+        # Add default: settings.VELCRO_TABULAR_INLINE = True
+        generate_inline_model(sorted(r))
+        generate_inline_model(sorted(r, reverse=True))
+        generate_and_register_admin_model(r)
+
+    for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
+        for model_metadata in object_type_metadata:
+            app_name = model_metadata['app_label']
+            model_name = model_metadata['model']
+            add_velcro_to_third_party_admin(app_name, model_name, object_type)
 
 def add_velcro_to_third_party_admin(app_name, model_name, object_type):
     """
@@ -137,29 +150,4 @@ def generate_and_register_admin_model(relationship):
     admin.site.register(model, klass)
 
 
-##############################################
-# GENERATE ADMIN & INLINE CLASSES            #
-##############################################
-# Define VELCRO_RELATIONSHIPS in settings.py #
-##############################################
-
-for r in settings.VELCRO_RELATIONSHIPS:
-    import_relationship_model(r)
-    generate_inline_model(sorted(r))
-    generate_inline_model(sorted(r, reverse=True))
-    generate_and_register_admin_model(r)
-
-
-###################################################################
-# MODIFY ADMIN MODELS FOR MODELS WITH ENTRIES IN VELCRO_METADATA: #
-# - ADD INHERITANCE FROM GenericAdminModelAdmin                   #
-# - ADD INLINE CLASSES FOR RELATIONSHIP MODELS                    #
-###################################################################
-# Define VELCRO_METADATA in settings.py                           #
-###################################################################
-
-for object_type, object_type_metadata in settings.VELCRO_METADATA.items():
-    for model_metadata in object_type_metadata:
-        app_name = model_metadata['app_label']
-        model_name = model_metadata['model']
-        add_velcro_to_third_party_admin(app_name, model_name, object_type)
+_startup()

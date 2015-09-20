@@ -7,11 +7,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
 
-################################################################
-# RELATIONSHIP CLASS GENERATOR                                 #
-################################################################
-# Define VELCRO_METADATA & VELCRO_RELATIONSHIPS in settings.py #
-################################################################
+def _startup():
+    """
+    Generate relationship classes.
+    """
+    for r in settings.VELCRO_RELATIONSHIPS:
+        generate_relationship_model(r)
 
 def generate_relationship_model(relationship):
     """
@@ -175,11 +176,4 @@ def generate_relationship_model(relationship):
     globals()[klass_name] = klass
 
 
-################################################################
-# GENERATE RELATIONSHIP CLASSES                                #
-################################################################
-# Define VELCRO_METADATA & VELCRO_RELATIONSHIPS in settings.py #
-################################################################
-
-for r in settings.VELCRO_RELATIONSHIPS:
-    generate_relationship_model(r)
+_startup()
