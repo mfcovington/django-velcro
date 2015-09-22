@@ -195,6 +195,22 @@ def get_relationship_inlines(object_type, related_types=None):
 
     return inlines
 
+def has_related_content(object, *related_types, object_type=None):
+    """
+    Return Boolean True/False depending on whether object has related content.
+    """
+    related_content = get_related_content(object, *related_types, limit=1,
+        object_type=object_type)
+
+    has_related = False
+
+    for related_type, related_objects in related_content.items():
+        if related_objects:
+            has_related = True
+            break
+
+    return has_related
+
 def is_valid_object_type(object_type):
     """
     Return 'True' if the provided object type is defined in
