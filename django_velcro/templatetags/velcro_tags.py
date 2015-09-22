@@ -2,6 +2,7 @@ from django import template
 from django.core.urlresolvers import reverse
 
 from django_velcro.settings import VELCRO_METADATA
+from django_velcro.utils import get_related_content
 
 
 register = template.Library()
@@ -29,3 +30,11 @@ def velcro_url(context, object=None, object_type=None):
     view = model_metadata['view']
     url_args = model_metadata['url_args']
     return reverse(view, args=[getattr(object, arg) for arg in url_args])
+
+@register.inclusion_tag('django_velcro/related_content.html')
+def velcro_related(object):
+    """
+    Template tag to list related content organized by related type.
+    """
+    related_content = get_related_content(object)
+    return {'related_content': related_content}
