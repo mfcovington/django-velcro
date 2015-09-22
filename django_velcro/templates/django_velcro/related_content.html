@@ -1,14 +1,14 @@
 {% load velcro_tags %}
 
 <ul>
-  {% for object_type, related_objects in related_content.items %}
+  {% for related_type, related_objects in related_content.items %}
     {% if related_objects %}
       <li class="related-type">
-        {{ object_type | title }}
+        {{ related_type | title }}
         <ul>
-          {% for object in related_objects %}
+          {% for related_object in related_objects %}
             <li class="related-object">
-              <a href="{% velcro_url %}">{{ object }}</a>
+              <a href="{% velcro_url %}">{{ related_object }}</a>
             </li>
           {% endfor %}
         </ul>
