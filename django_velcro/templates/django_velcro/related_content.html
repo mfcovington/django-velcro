@@ -1,21 +1,23 @@
 {% load velcro_tags %}
 
-<{{ related_content_label_tag }} class="related-content-label">
-  {{ related_content_label }}
-</{{ related_content_label_tag }}>
-<ul>
-  {% for related_type, related_objects in related_content.items %}
-    {% if related_objects %}
-      <li class="related-type">
-        {{ related_type | title }}
-        <ul>
-          {% for related_object in related_objects %}
-            <li class="related-object">
-              <a href="{% velcro_url %}">{{ related_object }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      </li>
-    {% endif %}
-  {% endfor %}
-</ul>
+{% if has_related_content %}
+  <{{ related_content_label_tag }} class="related-content-label">
+    {{ related_content_label }}
+  </{{ related_content_label_tag }}>
+  <ul>
+    {% for related_type, related_objects in related_content.items %}
+      {% if related_objects %}
+        <li class="related-type">
+          {{ related_type | title }}
+          <ul>
+            {% for related_object in related_objects %}
+              <li class="related-object">
+                <a href="{% velcro_url %}">{{ related_object }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endif %}

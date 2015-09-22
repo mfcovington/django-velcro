@@ -2,7 +2,7 @@ from django import template
 from django.core.urlresolvers import reverse
 
 from django_velcro.settings import VELCRO_METADATA
-from django_velcro.utils import get_related_content
+from django_velcro.utils import get_related_content, has_related_content
 
 
 register = template.Library()
@@ -48,6 +48,7 @@ def velcro_related(object, label='Related Content', label_tag='h3'):
         {% velcro_related object label='Related Junk' label_tag='h1' %}
     """
     return {
+        'has_related_content': has_related_content(object),
         'related_content': get_related_content(object),
         'related_content_label': label,
         'related_content_label_tag': label_tag,
