@@ -34,9 +34,21 @@ def velcro_url(context, related_object=None, related_type=None):
         view, args=[getattr(related_object, arg) for arg in url_args])
 
 @register.inclusion_tag('django_velcro/related_content.html')
-def velcro_related(object):
+def velcro_related(object, label='Related Content', label_tag='h3'):
     """
     Template tag to list related content organized by related type.
+
+    Default label is '<h3>Related Content</h3>'. Use 'label' and 'label_tag'
+    arguments to customize the label.
+
+    Basic usage example:
+        {% velcro_related object %}
+
+    Custom label example:
+        {% velcro_related object label='Related Junk' label_tag='h1' %}
     """
-    related_content = get_related_content(object)
-    return {'related_content': related_content}
+    return {
+        'related_content': get_related_content(object),
+        'related_content_label': label,
+        'related_content_label_tag': label_tag,
+    }

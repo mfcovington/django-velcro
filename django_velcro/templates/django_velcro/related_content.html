@@ -1,5 +1,8 @@
 {% load velcro_tags %}
 
+<{{ related_content_label_tag }} class="related-content-label">
+  {{ related_content_label }}
+</{{ related_content_label_tag }}>
 <ul>
   {% for related_type, related_objects in related_content.items %}
     {% if related_objects %}
