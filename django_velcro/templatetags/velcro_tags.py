@@ -46,6 +46,12 @@ def velcro_related(object, label='Related Content', label_tag='h3'):
 
     Custom label example:
         {% velcro_related object label='Related Junk' label_tag='h1' %}
+
+    The resulting list of related content can be styled with CSS using the
+    following classes:
+      - .related-content-label
+      - .related-type
+      - .related-object
     """
     return {
         'has_related_content': has_related_content(object),
