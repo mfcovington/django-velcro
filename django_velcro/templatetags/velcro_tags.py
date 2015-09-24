@@ -34,7 +34,7 @@ def velcro_url(context, related_object=None, related_type=None):
         view, args=[getattr(related_object, arg) for arg in url_args])
 
 @register.inclusion_tag('django_velcro/related_content.html')
-def velcro_related(object, label='Related Content', label_tag='h3'):
+def velcro_related(object, label=None, label_tag='h3'):
     """
     Template tag to list related content organized by related type.
 
