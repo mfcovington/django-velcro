@@ -21,7 +21,7 @@ def _startup():
         generate_and_register_admin_model(r)
 
     for object_type, object_type_metadata in VELCRO_METADATA.items():
-        for model_metadata in object_type_metadata:
+        for model_metadata in object_type_metadata['apps']:
             app_name = model_metadata['app_label']
             model_name = model_metadata['model']
             add_velcro_to_third_party_admin(app_name, model_name, object_type)

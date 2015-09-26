@@ -25,7 +25,7 @@ def velcro_url(context, related_object=None, related_type=None):
     if related_type is None:
         related_type = context['related_type']
 
-    related_type_metadata = VELCRO_METADATA[related_type]
+    related_type_metadata = VELCRO_METADATA[related_type]['apps']
     related_model_metadata = find_dict_in_list(
         related_type_metadata, 'model', related_object.__class__.__name__)
     view = related_model_metadata['view']

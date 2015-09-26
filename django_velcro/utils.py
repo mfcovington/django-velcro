@@ -52,7 +52,7 @@ def get_object_type(object):
     model = object.__class__._meta.object_name
 
     for object_type, type_metadata in sorted(VELCRO_METADATA.items()):
-        for model_metadata in type_metadata:
+        for model_metadata in type_metadata['apps']:
             if (model_metadata['app_label'] == app_label and
                     model_metadata['model'] == model):
                 return object_type

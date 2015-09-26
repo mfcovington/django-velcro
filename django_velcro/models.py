@@ -23,34 +23,38 @@ def generate_relationship_model(relationship):
 
         # settings.py:
         VELCRO_METADATA = {
-            'data': [
-                {
-                    'app_label': 'data',
-                    'model': 'Data',
-                    'view': 'data:data-detail',
-                    'url_args': ['pk']
-                },
-                {
-                    'app_label': 'data',
-                    'model': 'DataSet',
-                    'view': 'data:dataset-detail',
-                    'url_args': ['pk']
-                },
-            ],
-            'publications': [
-                {
-                    'app_label': 'publication',
-                    'model': 'Publication',
-                    'view': 'publications:publication-detail',
-                    'url_args': ['pk']
-                },
-                {
-                    'app_label': 'publication',
-                    'model': 'PublicationSet',
-                    'view': 'publications:publicationset-detail',
-                    'url_args': ['pk']
-                },
-            ],
+            'data': {
+                'apps': [
+                    {
+                        'app_label': 'data',
+                        'model': 'Data',
+                        'view': 'data:data-detail',
+                        'url_args': ['pk']
+                    },
+                    {
+                        'app_label': 'data',
+                        'model': 'DataSet',
+                        'view': 'data:dataset-detail',
+                        'url_args': ['pk']
+                    },
+                ],
+            },
+            'publications': {
+                'apps': [
+                    {
+                        'app_label': 'publication',
+                        'model': 'Publication',
+                        'view': 'publications:publication-detail',
+                        'url_args': ['pk']
+                    },
+                    {
+                        'app_label': 'publication',
+                        'model': 'PublicationSet',
+                        'view': 'publications:publicationset-detail',
+                        'url_args': ['pk']
+                    },
+                ],
+            },
         }
 
         # models.py
@@ -159,7 +163,7 @@ def generate_relationship_model(relationship):
 
     for content in map(lambda x: x.lower(), relationship):
         queries = []
-        for lim in VELCRO_METADATA[content]:
+        for lim in VELCRO_METADATA[content]['apps']:
             queries.append(
                 models.Q(**{k: lim[k].lower() for k in ('app_label', 'model')}))
         limit = reduce(operator.or_, queries, models.Q())
