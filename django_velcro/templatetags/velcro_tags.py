@@ -54,18 +54,21 @@ def velcro_plural(value, arg=None):
     return plural.title()
 
 @register.inclusion_tag('django_velcro/related_content.html')
-def velcro_related(object, label=None, label_tag='h3'):
+def velcro_related(object, label=None, label_tag='h3', prefix=None):
     """
     Template tag to list related content organized by related type.
 
     Default label is '<h3>Related Content</h3>'. Use 'label' and 'label_tag'
     arguments to customize the label.
 
+    Use the 'prefix' argument to prepend related type names with a word
+    (e.g., 'Related').
+
     Basic usage example:
         {% velcro_related object %}
 
     Custom label example:
-        {% velcro_related object label='Related Junk' label_tag='h1' %}
+        {% velcro_related object label='Related Junk' label_tag='h1' prefix='Related' %}
 
     The resulting list of related content can be styled with CSS using the
     following classes:
@@ -78,4 +81,5 @@ def velcro_related(object, label=None, label_tag='h3'):
         'related_content': get_related_content(object),
         'related_content_label': label,
         'related_content_label_tag': label_tag,
+        'related_content_prefix': prefix,
     }
