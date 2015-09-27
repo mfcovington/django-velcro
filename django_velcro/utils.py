@@ -232,6 +232,30 @@ def remove_related_content(object_1, object_2):
 
     relationship_class.objects.get(**query).delete()
 
+def plural_object_type(object_type):
+    """
+    Take an object type and return the plural version of it.
+    """
+    type_metadata = VELCRO_METADATA[object_type]
+    try:
+        plural = type_metadata['options']['verbose_name_plural']
+    except:
+        plural = '{}s'.format(object_type)
+
+    return(plural)
+
+def singular_object_type(object_type):
+    """
+    Take an object type and return the singular version of it.
+    """
+    type_metadata = VELCRO_METADATA[object_type]
+    try:
+        singular = type_metadata['options']['verbose_name']
+    except:
+        singular = object_type
+
+    return(singular)
+
 def validate_related_types(object_type, related_types):
     """
     Given an object type and a list of related types, return a list of the

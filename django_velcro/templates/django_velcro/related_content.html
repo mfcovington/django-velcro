@@ -10,7 +10,7 @@
     {% for related_type, related_objects in related_content.items %}
       {% if related_objects %}
         <li class="related-type">
-          {{ related_type | title }}
+          {{ related_type | velcro_plural }}
           <ul>
             {% for related_object in related_objects %}
               <li class="related-object">

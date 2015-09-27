@@ -2,7 +2,8 @@ from django import template
 from django.core.urlresolvers import reverse
 
 from django_velcro.settings import VELCRO_METADATA
-from django_velcro.utils import get_related_content, has_related_content
+from django_velcro.utils import (get_related_content, has_related_content,
+    plural_object_type)
 
 
 register = template.Library()
@@ -32,6 +33,25 @@ def velcro_url(context, related_object=None, related_type=None):
     url_args = related_model_metadata['url_args']
     return reverse(
         view, args=[getattr(related_object, arg) for arg in url_args])
+
+@register.filter
+def velcro_plural(value, arg=None):
+    """
+    Take an object type and return the plural version of it.
+    If an argument is provided, it is place vefore the pluralized object type.
+    Output is in Title Case.
+
+    Returns 'Publications':
+        {{ 'publication' | velcro_plural }}
+
+    Returns 'Related Publications':
+        {{ 'publication' | velcro_plural:'related' }}
+    """
+    plural = plural_object_type(value)
+    if arg:
+        plural = ' '.join([arg, plural])
+
+    return plural.title()
 
 @register.inclusion_tag('django_velcro/related_content.html')
 def velcro_related(object, label=None, label_tag='h3'):

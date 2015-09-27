@@ -5,7 +5,8 @@ from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
 
 from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS, VELCRO_TABULAR_INLINE
-from .utils import get_relationship_inlines
+from .utils import (get_relationship_inlines, plural_object_type,
+    singular_object_type)
 
 
 def _startup():
@@ -86,7 +87,7 @@ def generate_inline_model(relationship, tabular=VELCRO_TABULAR_INLINE):
             ct_fk_field = 'data_object_id'
             fields = ['publications_content_type', 'publications_object_id']
             ordering = ['publications_content_type', 'order_by']
-            verbose_name = 'Related Publications'
+            verbose_name = 'Related Publication'
             verbose_name_plural = 'Related Publications'
     """
     content_1, content_2 = relationship
@@ -114,8 +115,10 @@ def generate_inline_model(relationship, tabular=VELCRO_TABULAR_INLINE):
             'model': eval('{}{}Relationship'.format(
                 *sorted(map(lambda x: x.capitalize(), relationship)))),
             '__module__': __name__,
-            'verbose_name': 'Related {}'.format(content_2).title(),
-            'verbose_name_plural': 'Related {}'.format(content_2).title(),
+            'verbose_name': 'Related {}'.format(
+                singular_object_type(content_2)).title(),
+            'verbose_name_plural': 'Related {}'.format(
+                plural_object_type(content_2)).title(),
         }
     )
     globals()[klass_name] = klass

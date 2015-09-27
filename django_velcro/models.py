@@ -38,6 +38,10 @@ def generate_relationship_model(relationship):
                         'url_args': ['pk']
                     },
                 ],
+                'options': {
+                    'verbose_name': 'data',
+                    'verbose_name_plural': 'data',
+                },
             },
             'publications': {
                 'apps': [
@@ -54,6 +58,10 @@ def generate_relationship_model(relationship):
                         'url_args': ['pk']
                     },
                 ],
+                'options': {
+                    'verbose_name': 'publication',
+                    'verbose_name_plural': 'publications',
+                },
             },
         }
 
