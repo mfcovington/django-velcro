@@ -24,16 +24,13 @@ def get_velcro_related(object, verbose=False):
     """
     return get_related_content(object, verbose=verbose)
 
-@register.simple_tag(takes_context=True)
-def velcro_url(context, related_object=None, related_type=None):
+@register.simple_tag
+def velcro_url(related_object, related_type=None):
     """
     Template tag to get the reverse URL for a related object.
-    Only requires argument if 'related_object' is not defined.
     If 'related_type' is not defined, the object type of the related object
     will be retrieved.
     """
-    if related_object is None:
-        related_object = context['related_object']
     if related_type is None:
         related_type = get_object_type(related_object)
 
@@ -45,16 +42,14 @@ def velcro_url(context, related_object=None, related_type=None):
     return reverse(
         view, args=[getattr(related_object, arg) for arg in url_args])
 
-@register.inclusion_tag('django_velcro/velcro_link.html', takes_context=True)
-def velcro_link(context, related_object=None, related_type=None):
+@register.inclusion_tag('django_velcro/velcro_link.html')
+def velcro_link(related_object, related_type=None):
     """
     Make a link to a related object. Contains entire '<a href>' tag.
     The text is derived from 'object.__str__()'.
     If 'related_type' is not defined, the object type of the related object
     will be retrieved.
     """
-    if related_object is None:
-        related_object = context['related_object']
     if related_type is None:
         related_type = get_object_type(related_object)
 
