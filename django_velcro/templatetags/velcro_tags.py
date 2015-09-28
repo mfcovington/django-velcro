@@ -2,8 +2,8 @@ from django import template
 from django.core.urlresolvers import reverse
 
 from django_velcro.settings import VELCRO_METADATA
-from django_velcro.utils import (get_related_content, has_related_content,
-    plural_object_type)
+from django_velcro.utils import (get_object_type, get_related_content,
+    has_related_content, plural_object_type)
 
 
 register = template.Library()
@@ -28,13 +28,14 @@ def get_velcro_related(object):
 def velcro_url(context, related_object=None, related_type=None):
     """
     Template tag to get the reverse URL for a related object.
-    Only requires arguments if 'related_object' and/or 'related_type'
-    are not defined.
+    Only requires argument if 'related_object' is not defined.
+    If 'related_type' is not defined, the object type of the related object
+    will be retrieved.
     """
     if related_object is None:
         related_object = context['related_object']
     if related_type is None:
-        related_type = context['related_type']
+        related_type = get_object_type(related_object)
 
     related_type_metadata = VELCRO_METADATA[related_type]['apps']
     related_model_metadata = find_dict_in_list(
