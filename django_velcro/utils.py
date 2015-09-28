@@ -71,7 +71,7 @@ def get_or_validate_related_types(object_type, related_types=None):
     return related_types
 
 def get_related_content(object, *related_types, grouped=True, limit=None,
-    object_type=None):
+    object_type=None, verbose=False):
     """
     Return a dictionary of related content (of given related type(s)) for an
     object. Each key is a related type and its value is a list of related
@@ -106,6 +106,9 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
         }
         relationships = relationship_class.objects.filter(**query)[:limit]
         related_content_object = '{}_content_object'.format(rt)
+
+        if verbose:
+            rt = plural_object_type(rt)
 
         related_content[rt] = [getattr(related, related_content_object)
             for related in sorted(relationships,

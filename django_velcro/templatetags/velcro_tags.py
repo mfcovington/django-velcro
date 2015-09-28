@@ -15,14 +15,14 @@ def find_dict_in_list(list_, key, value):
     return []
 
 @register.assignment_tag
-def get_velcro_related(object):
+def get_velcro_related(object, verbose=False):
     """
     Get related content and assign it to a variable.
 
     Example:
         {% get_velcro_related object as related_content %}
     """
-    return get_related_content(object)
+    return get_related_content(object, verbose=verbose)
 
 @register.simple_tag(takes_context=True)
 def velcro_url(context, related_object=None, related_type=None):
