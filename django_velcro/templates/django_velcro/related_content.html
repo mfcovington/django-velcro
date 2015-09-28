@@ -14,7 +14,7 @@
           <ul>
             {% for related_object in related_objects %}
               <li class="related-object">
-                <a href="{% velcro_url %}">{{ related_object }}</a>
+                {% velcro_link %}
               </li>
             {% endfor %}
           </ul>
