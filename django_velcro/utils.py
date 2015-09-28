@@ -9,6 +9,20 @@ from django.db import models
 from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS
 
 
+def _startup():
+    """
+    Add methods to velcro-managed models to add, get, and remove related content.
+    """
+    for object_type, object_type_metadata in VELCRO_METADATA.items():
+        for model_metadata in object_type_metadata['apps']:
+            app_name = model_metadata['app_label']
+            model_name = model_metadata['model']
+            model = apps.get_model(app_name, model_name)
+            model.add_velcro_content = add_related_content
+            model.get_velcro_content = get_related_content
+            model.get_velcro_content_sametype = get_related_content_sametype
+            model.remove_velcro_content = remove_related_content
+
 def _relationship_query(object_1, object_1_type, object_2, object_2_type):
     """
     Return a dict for making relationship object queries.
@@ -284,3 +298,6 @@ def validate_related_types(object_type, related_types):
         print('Warning: {}'.format(e))
 
     return valid_related_types
+
+
+_startup()
