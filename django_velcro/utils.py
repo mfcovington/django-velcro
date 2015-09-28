@@ -1,3 +1,4 @@
+import inspect
 from collections import OrderedDict
 from importlib import import_module
 
@@ -62,8 +63,13 @@ def get_object_type(object):
     """
     Return the object type for a given object based on Django Velcro metadata.
     """
-    app_label = object.__class__._meta.app_label.lower()
-    model = object.__class__._meta.object_name
+    if inspect.isclass(object):
+        object_class = object
+    else:
+        object_class = object.__class__
+
+    app_label = object_class._meta.app_label.lower()
+    model = object_class._meta.object_name
 
     for object_type, type_metadata in sorted(VELCRO_METADATA.items()):
         for model_metadata in type_metadata['apps']:
