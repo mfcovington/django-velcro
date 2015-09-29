@@ -39,6 +39,18 @@ def _startup():
                     get_velcro_content_for_related_type
                 )
 
+                def get_velcro_content_sametype_for_related_type(
+                        self, related_type=related_type):
+                    related_content = get_related_content_sametype(
+                        self, related_type)
+                    return related_content
+
+                setattr(
+                    model,
+                    'get_velcro_{}_content_sametype'.format(related_type),
+                    get_velcro_content_sametype_for_related_type
+                )
+
 def _relationship_query(object_1, object_1_type, object_2, object_2_type):
     """
     Return a dict for making relationship object queries.
