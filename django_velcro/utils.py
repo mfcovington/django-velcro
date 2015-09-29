@@ -24,6 +24,21 @@ def _startup():
             model.get_velcro_content_sametype = get_related_content_sametype
             model.remove_velcro_content = remove_related_content
 
+            for related_type in get_related_types(object_type):
+                def get_velcro_content_for_related_type(
+                        self, related_type=related_type, **kwargs):
+                    if 'grouped' not in kwargs.keys():
+                        kwargs['grouped'] = False
+                    related_content = get_related_content(
+                        self, related_type, **kwargs)
+                    return related_content
+
+                setattr(
+                    model,
+                    'get_velcro_{}_content'.format(related_type),
+                    get_velcro_content_for_related_type
+                )
+
 def _relationship_query(object_1, object_1_type, object_2, object_2_type):
     """
     Return a dict for making relationship object queries.
