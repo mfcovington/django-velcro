@@ -54,6 +54,58 @@ def _startup():
                     get_velcro_content_sametype_for_related_type
                 )
 
+def _add_related_content_difftype(
+        object_1, object_2, object_1_type, object_2_type):
+    """
+    Get or create a relationship between two objects with different object
+    types.
+
+    Returns the relationship object and a boolean indicating whether
+    the relationship was created.
+    """
+    relationship_class = get_relationship_class(object_1_type, object_2_type)
+    query = _relationship_query(
+        object_1, object_1_type, object_2, object_2_type)
+
+    return relationship_class.objects.get_or_create(**query)
+
+def _add_related_content_sametype(
+        object_1, object_2, object_1_type, object_2_type):
+    """
+    Get or create a relationship between two objects with matching object
+    types.
+
+    Returns the relationship object and a boolean indicating whether
+    the relationship was created.
+    """
+    relationship_class = get_relationship_class(object_1_type, object_2_type)
+
+    try:
+        query = models.Q(
+            content_type_1=ContentType.objects.get_for_model(object_1),
+            object_id_1=object_1.id,
+            content_type_2=ContentType.objects.get_for_model(object_2),
+            object_id_2=object_2.id,
+        ) | models.Q(
+            content_type_1=ContentType.objects.get_for_model(object_2),
+            object_id_1=object_2.id,
+            content_type_2=ContentType.objects.get_for_model(object_1),
+            object_id_2=object_1.id,
+        )
+        relationship = relationship_class.objects.get(query)
+        created = False
+    except:
+        params = {
+            'content_type_1': ContentType.objects.get_for_model(object_1),
+            'object_id_1': object_1.id,
+            'content_type_2': ContentType.objects.get_for_model(object_2),
+            'object_id_2': object_2.id,
+        }
+        relationship = relationship_class.objects.create(**params)
+        created = True
+
+    return relationship, created
+
 def _relationship_query(object_1, object_1_type, object_2, object_2_type):
     """
     Return a dict for making relationship object queries.
@@ -77,11 +129,17 @@ def add_related_content(object_1, object_2):
     object_1_type = get_object_type(object_1)
     object_2_type = get_object_type(object_2)
 
-    relationship_class = get_relationship_class(object_1_type, object_2_type)
-    query = _relationship_query(object_1, object_1_type, object_2,
-        object_2_type)
+    kwargs = {
+        'object_1': object_1,
+        'object_2': object_2,
+        'object_1_type': object_1_type,
+        'object_2_type': object_2_type,
+    }
 
-    return relationship_class.objects.get_or_create(**query)
+    if object_1_type == object_2_type:
+        return _add_related_content_sametype(**kwargs)
+    else:
+        return _add_related_content_difftype(**kwargs)
 
 def get_all_object_types():
     """
