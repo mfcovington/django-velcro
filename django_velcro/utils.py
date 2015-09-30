@@ -7,13 +7,16 @@ from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS
+from .settings import VELCRO_METADATA, VELCRO_METHODS, VELCRO_RELATIONSHIPS
 
 
 def _startup():
     """
     Add methods to velcro-managed models to add, get, and remove related content.
     """
+    if VELCRO_METHODS == False:
+        return
+
     for object_type, object_type_metadata in VELCRO_METADATA.items():
         for model_metadata in object_type_metadata['apps']:
             app_name = model_metadata['app_label']
