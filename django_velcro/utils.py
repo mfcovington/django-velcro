@@ -54,57 +54,64 @@ def _startup():
                     get_velcro_content_sametype_for_related_type
                 )
 
-def _add_related_content_difftype(
-        object_1, object_2, object_1_type, object_2_type):
+def _add_or_remove_related_content_difftype(
+        object_1, object_2, object_1_type, object_2_type, add_or_remove):
     """
-    Get or create a relationship between two objects with different object
-    types.
+    Get or create OR remove a relationship between two objects with different
+    object types depending on whether 'add_or_remove' equals 'add' or 'remove'.
 
-    Returns the relationship object and a boolean indicating whether
-    the relationship was created.
+    If adding a relationship, returns the relationship object and a boolean
+    indicating whether the relationship was created.
     """
     relationship_class = get_relationship_class(object_1_type, object_2_type)
     query = _relationship_query(
         object_1, object_1_type, object_2, object_2_type)
 
-    return relationship_class.objects.get_or_create(**query)
+    if add_or_remove == 'add':
+        return relationship_class.objects.get_or_create(**query)
+    elif add_or_remove == 'remove':
+        relationship_class.objects.get(**query).delete()
 
-def _add_related_content_sametype(
-        object_1, object_2, object_1_type, object_2_type):
+def _add_or_remove_related_content_sametype(
+        object_1, object_2, object_1_type, object_2_type, add_or_remove):
     """
-    Get or create a relationship between two objects with matching object
-    types.
+    Get or create OR remove a relationship between two objects with matching
+    object types depending on whether 'add_or_remove' equals 'add' or 'remove'.
 
-    Returns the relationship object and a boolean indicating whether
-    the relationship was created.
+    If adding a relationship, returns the relationship object and a boolean
+    indicating whether the relationship was created.
     """
     relationship_class = get_relationship_class(object_1_type, object_2_type)
 
-    try:
-        query = models.Q(
-            content_type_1=ContentType.objects.get_for_model(object_1),
-            object_id_1=object_1.id,
-            content_type_2=ContentType.objects.get_for_model(object_2),
-            object_id_2=object_2.id,
-        ) | models.Q(
-            content_type_1=ContentType.objects.get_for_model(object_2),
-            object_id_1=object_2.id,
-            content_type_2=ContentType.objects.get_for_model(object_1),
-            object_id_2=object_1.id,
-        )
-        relationship = relationship_class.objects.get(query)
-        created = False
-    except:
-        params = {
-            'content_type_1': ContentType.objects.get_for_model(object_1),
-            'object_id_1': object_1.id,
-            'content_type_2': ContentType.objects.get_for_model(object_2),
-            'object_id_2': object_2.id,
-        }
-        relationship = relationship_class.objects.create(**params)
-        created = True
+    query = models.Q(
+        content_type_1=ContentType.objects.get_for_model(object_1),
+        object_id_1=object_1.id,
+        content_type_2=ContentType.objects.get_for_model(object_2),
+        object_id_2=object_2.id,
+    ) | models.Q(
+        content_type_1=ContentType.objects.get_for_model(object_2),
+        object_id_1=object_2.id,
+        content_type_2=ContentType.objects.get_for_model(object_1),
+        object_id_2=object_1.id,
+    )
 
-    return relationship, created
+    if add_or_remove == 'add':
+        try:
+            relationship = relationship_class.objects.get(query)
+            created = False
+        except:
+            params = {
+                'content_type_1': ContentType.objects.get_for_model(object_1),
+                'object_id_1': object_1.id,
+                'content_type_2': ContentType.objects.get_for_model(object_2),
+                'object_id_2': object_2.id,
+            }
+            relationship = relationship_class.objects.create(**params)
+            created = True
+
+        return relationship, created
+    elif add_or_remove == 'remove':
+        relationship_class.objects.get(query).delete()
 
 def _relationship_query(object_1, object_1_type, object_2, object_2_type):
     """
@@ -130,6 +137,7 @@ def add_related_content(object_1, object_2):
     object_2_type = get_object_type(object_2)
 
     kwargs = {
+        'add_or_remove': 'add',
         'object_1': object_1,
         'object_2': object_2,
         'object_1_type': object_1_type,
@@ -137,9 +145,9 @@ def add_related_content(object_1, object_2):
     }
 
     if object_1_type == object_2_type:
-        return _add_related_content_sametype(**kwargs)
+        return _add_or_remove_related_content_sametype(**kwargs)
     else:
-        return _add_related_content_difftype(**kwargs)
+        return _add_or_remove_related_content_difftype(**kwargs)
 
 def get_all_object_types():
     """
@@ -337,11 +345,18 @@ def remove_related_content(object_1, object_2):
     object_1_type = get_object_type(object_1)
     object_2_type = get_object_type(object_2)
 
-    relationship_class = get_relationship_class(object_1_type, object_2_type)
-    query = _relationship_query(object_1, object_1_type, object_2,
-        object_2_type)
+    kwargs = {
+        'add_or_remove': 'remove',
+        'object_1': object_1,
+        'object_2': object_2,
+        'object_1_type': object_1_type,
+        'object_2_type': object_2_type,
+    }
 
-    relationship_class.objects.get(**query).delete()
+    if object_1_type == object_2_type:
+        _add_or_remove_related_content_sametype(**kwargs)
+    else:
+        _add_or_remove_related_content_difftype(**kwargs)
 
 def plural_object_type(object_type):
     """
