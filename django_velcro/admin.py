@@ -4,9 +4,9 @@ from django.contrib import admin
 from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
 
-from .settings import (VELCRO_INLINES, VELCRO_INLINES_EXTRA,
-    VELCRO_INLINES_MAX_NUM, VELCRO_INLINES_TABULAR, VELCRO_METADATA,
-    VELCRO_RELATIONSHIPS)
+from .settings import (VELCRO_GENERICADMIN, VELCRO_INLINES,
+    VELCRO_INLINES_EXTRA, VELCRO_INLINES_MAX_NUM, VELCRO_INLINES_TABULAR,
+    VELCRO_METADATA, VELCRO_RELATIONSHIPS)
 from .utils import (get_relationship_inlines, plural_object_type,
     singular_object_type)
 
@@ -35,6 +35,11 @@ def add_velcro_to_third_party_admin(app_name, model_name, object_type):
     Update third party admin models with inline classes for relationships
     and inheritance from 'GenericAdminModelAdmin'.
 
+    To prevent the inheritance third party admin models from inheriting from
+    'GenericAdminModelAdmin', add to 'settings.py':
+
+        VELCRO_GENERICADMIN = False
+
     To prevent the addition of inlines to third party admin models, add to
     'settings.py':
 
@@ -42,6 +47,11 @@ def add_velcro_to_third_party_admin(app_name, model_name, object_type):
     """
     model = apps.get_model(app_name, model_name)
     orig_model_admin = admin.site._registry[model].__class__
+
+    if VELCRO_GENERICADMIN:
+        model_admin = (GenericAdminModelAdmin, orig_model_admin)
+    else:
+        model_admin = (orig_model_admin, )
 
     orig_inlines = orig_model_admin.inlines
 
@@ -53,7 +63,7 @@ def add_velcro_to_third_party_admin(app_name, model_name, object_type):
 
     updated_model_admin = type(
         orig_model_admin.__name__,
-        (GenericAdminModelAdmin, orig_model_admin),
+        model_admin,
         {
             '__module__': __name__,
             'inlines': inlines,
