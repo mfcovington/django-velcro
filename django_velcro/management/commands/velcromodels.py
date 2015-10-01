@@ -3,6 +3,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django_velcro.utils import (get_all_object_types,
     get_relationship_inlines, is_valid_object_type)
 
+from django_velcro.settings import VELCRO_INLINES
+
 
 def validate_object_types(object_types):
     """
@@ -28,9 +30,9 @@ class Command(BaseCommand):
 
         for ot in object_types:
             self.stdout.write("\n[{}]".format(ot))
-            self.stdout.write("\n  inlines\n  -------\n")
 
-            for r in get_relationship_inlines(ot):
-                self.stdout.write('  {}'.format(r.__name__))
-
+            if VELCRO_INLINES:
+                self.stdout.write("\n  inlines\n  -------\n")
+                for r in get_relationship_inlines(ot):
+                    self.stdout.write('  {}'.format(r.__name__))
             self.stdout.write("\n")
