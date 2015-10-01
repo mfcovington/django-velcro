@@ -168,12 +168,12 @@ def generate_and_register_admin_model(relationship):
 
     Equivalent To:
 
-        class DataPublicationsAdmin(GenericAdminModelAdmin):
+        class DataPublicationsRelationshipAdmin(GenericAdminModelAdmin):
             readonly_fields = ['order_by']
         admin.site.register(DataPublicationsRelationship, DataPublicationsAdmin)
     """
     content_1, content_2 = sorted(map(lambda x: x.capitalize(), relationship))
-    klass_name = ''.format(content_1, content_2)
+    klass_name = '{}{}RelationshipAdmin'.format(content_1, content_2)
     klass = type(
         klass_name,
         (GenericAdminModelAdmin,),
