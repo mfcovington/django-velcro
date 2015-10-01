@@ -365,6 +365,15 @@ def get_relationship_inlines(object_type, related_types=None):
         globals()[inline_class_name] = inline_class
         inlines.append(inline_class)
 
+        if object_type == related:
+            inline_class_name = '{}To{}RelationshipReverseInline'.format(
+                object_type.capitalize(), related.capitalize())
+            inline_class = getattr(
+                import_module(
+                    '.admin', package=__package__), inline_class_name)
+            globals()[inline_class_name] = inline_class
+            inlines.append(inline_class)
+
     return inlines
 
 def has_related_content(object, *related_types, object_type=None):

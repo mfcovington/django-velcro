@@ -17,8 +17,8 @@ def _startup():
     """
     for r in VELCRO_RELATIONSHIPS:
         import_relationship_model(r)
-        generate_inline_model(sorted(r))
-        generate_inline_model(sorted(r, reverse=True))
+        generate_inline_model(r)
+        generate_inline_model(r, reverse=True)
         generate_and_register_admin_model(r)
 
     for object_type, object_type_metadata in VELCRO_METADATA.items():
@@ -69,7 +69,8 @@ def import_relationship_model(relationship):
     relationship_class = apps.get_model(__package__, relationship_class_name)
     globals()[relationship_class_name] = relationship_class
 
-def generate_inline_model(relationship, tabular=VELCRO_TABULAR_INLINE):
+def generate_inline_model(
+        relationship, reverse=False, tabular=VELCRO_TABULAR_INLINE):
     """
     Generates a tabular inline model from a relationship tuple.
     For a stacked inline model, add 'VELCRO_TABULAR_INLINE = False' to settings.
@@ -90,7 +91,7 @@ def generate_inline_model(relationship, tabular=VELCRO_TABULAR_INLINE):
             verbose_name = 'Related Publication'
             verbose_name_plural = 'Related Publications'
     """
-    content_1, content_2 = relationship
+    content_1, content_2 = sorted(relationship, reverse=reverse)
     klass_name = '{}To{}RelationshipInline'.format(content_1.capitalize(), content_2.capitalize())
 
     if tabular:
@@ -98,10 +99,48 @@ def generate_inline_model(relationship, tabular=VELCRO_TABULAR_INLINE):
     else:
         inline_style = GenericStackedInline
 
-    klass = type(
-        klass_name,
-        (inline_style,),
-        {
+    typedict = {
+        'model': eval('{}{}Relationship'.format(
+            *sorted(map(lambda x: x.capitalize(), relationship)))),
+        '__module__': __name__,
+        'verbose_name': 'Related {}'.format(
+            singular_object_type(content_2)).title(),
+    }
+
+    if content_1 == content_2:
+        if reverse:
+            klass_name = '{}To{}RelationshipReverseInline'.format(
+                content_1.capitalize(), content_2.capitalize())
+            typedict.update({
+                'ct_field': 'content_type_2'.format(content_2.lower()),
+                'ct_fk_field': 'object_id_2'.format(content_2.lower()),
+                'extra': 0,
+                'fields': [
+                    'content_type_1'.format(content_1.lower()),
+                    'object_id_1'.format(content_1.lower()),
+                ],
+                'ordering': [
+                    'order_by',
+                ],
+                'verbose_name_plural': 'Related {} (Reverse)'.format(
+                    plural_object_type(content_1)).title(),
+            })
+        else:
+            typedict.update({
+                'ct_field': 'content_type_1'.format(content_1.lower()),
+                'ct_fk_field': 'object_id_1'.format(content_1.lower()),
+                'fields': [
+                    'content_type_2'.format(content_2.lower()),
+                    'object_id_2'.format(content_2.lower()),
+                ],
+                'ordering': [
+                    'order_by',
+                ],
+                'verbose_name_plural': 'Related {} (Forward)'.format(
+                    plural_object_type(content_2)).title(),
+            })
+    else:
+        typedict.update({
             'ct_field': '{}_content_type'.format(content_1.lower()),
             'ct_fk_field': '{}_object_id'.format(content_1.lower()),
             'fields': [
@@ -112,15 +151,11 @@ def generate_inline_model(relationship, tabular=VELCRO_TABULAR_INLINE):
                 '{}_content_type'.format(content_2.lower()),
                 'order_by',
             ],
-            'model': eval('{}{}Relationship'.format(
-                *sorted(map(lambda x: x.capitalize(), relationship)))),
-            '__module__': __name__,
-            'verbose_name': 'Related {}'.format(
-                singular_object_type(content_2)).title(),
             'verbose_name_plural': 'Related {}'.format(
                 plural_object_type(content_2)).title(),
-        }
-    )
+        })
+
+    klass = type(klass_name, (inline_style,), typedict)
     globals()[klass_name] = klass
 
 def generate_and_register_admin_model(relationship):
