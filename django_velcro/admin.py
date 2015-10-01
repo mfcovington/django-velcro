@@ -4,8 +4,8 @@ from django.contrib import admin
 from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
 
-from .settings import (VELCRO_INLINES_TABULAR, VELCRO_METADATA,
-    VELCRO_RELATIONSHIPS)
+from .settings import (VELCRO_INLINES_EXTRA, VELCRO_INLINES_TABULAR,
+    VELCRO_METADATA, VELCRO_RELATIONSHIPS)
 from .utils import (get_relationship_inlines, plural_object_type,
     singular_object_type)
 
@@ -131,6 +131,7 @@ def generate_inline_model(
             typedict.update({
                 'ct_field': 'content_type_1'.format(content_1.lower()),
                 'ct_fk_field': 'object_id_1'.format(content_1.lower()),
+                'extra': VELCRO_INLINES_EXTRA,
                 'fields': [
                     'content_type_2'.format(content_2.lower()),
                     'object_id_2'.format(content_2.lower()),
@@ -145,6 +146,7 @@ def generate_inline_model(
         typedict.update({
             'ct_field': '{}_content_type'.format(content_1.lower()),
             'ct_fk_field': '{}_object_id'.format(content_1.lower()),
+            'extra': VELCRO_INLINES_EXTRA,
             'fields': [
                 '{}_content_type'.format(content_2.lower()),
                 '{}_object_id'.format(content_2.lower()),
