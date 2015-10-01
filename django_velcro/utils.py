@@ -81,6 +81,9 @@ def _add_or_remove_related_content_sametype(
     If adding a relationship, returns the relationship object and a boolean
     indicating whether the relationship was created.
     """
+    if object_1 == object_2:
+        raise ValueError("{} can't be related to itself.".format(object_1))
+
     relationship_class = get_relationship_class(object_1_type, object_2_type)
 
     query = models.Q(

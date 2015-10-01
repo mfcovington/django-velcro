@@ -133,7 +133,11 @@ def _generate_relationship_model_sametype(object_type):
 
             self.order_by = self.__str__()
 
-            super().save(*args, **kwargs)
+            if (self.content_type_1 == self.content_type_2 and
+                    self.object_id_1 == self.object_id_2):
+                print("Object can't be related to itself.")
+            else:
+                super().save(*args, **kwargs)
 
         def __str__(self):
             return '{}: {} ⟷  {}: {}'.format(
