@@ -186,6 +186,57 @@ def get_or_validate_related_types(object_type, related_types=None):
 
     return related_types
 
+def _get_related_content_difftype(
+        object, object_type, related_type, content_type, relationship_class,
+        limit, verbose):
+    """
+    Get related content for a related type that differs from the query object's
+    type.
+    """
+    query = {
+        '{}_object_id'.format(object_type): object.id,
+        '{}_content_type'.format(object_type): content_type,
+    }
+    relationships = relationship_class.objects.filter(**query)[:limit]
+    related_content_object = '{}_content_object'.format(related_type)
+
+    return [
+        getattr(related, related_content_object) for related in
+        sorted(relationships, key=lambda x: (
+            type(getattr(x, related_content_object)).__name__.lower(),
+            getattr(x, related_content_object).__str__().lower()))
+    ]
+
+def _get_related_content_sametype(
+        object, related_type, content_type, relationship_class, limit,
+        verbose):
+    """
+    Get related content for a related type that matches the query object's
+    type.
+    """
+    query = models.Q(
+        content_type_1=content_type,
+        object_id_1=object.id,
+    ) | models.Q(
+        content_type_2=content_type,
+        object_id_2=object.id,
+    )
+
+    related_content = []
+    relationships = [
+        (r.content_object_1, r.content_object_2)
+        for r in relationship_class.objects.filter(query)[:limit]
+    ]
+
+    for relationship in relationships:
+        if relationship.index(object) == 0:
+            related_content.append(relationship[1])
+        else:
+            related_content.append(relationship[0])
+
+    return sorted(
+        related_content, key=lambda x: (type(x).__name__.lower(), x.__str__()))
+
 def get_related_content(object, *related_types, grouped=True, limit=None,
     object_type=None, verbose=False):
     """
@@ -216,21 +267,24 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
         relationship_class = get_relationship_class(object_type, rt)
 
         content_type = ContentType.objects.get_for_model(object)
-        query = {
-            '{}_object_id'.format(object_type): object.id,
-            '{}_content_type'.format(object_type): content_type,
+
+        kwargs = {
+            'content_type': content_type,
+            'limit': limit,
+            'object': object,
+            'related_type': rt,
+            'relationship_class': relationship_class,
+            'verbose': verbose,
         }
-        relationships = relationship_class.objects.filter(**query)[:limit]
-        related_content_object = '{}_content_object'.format(rt)
 
         if verbose:
             rt = plural_object_type(rt)
 
-        related_content[rt] = [getattr(related, related_content_object)
-            for related in sorted(relationships,
-                key=lambda x: (
-                    type(getattr(x, related_content_object)).__name__.lower(),
-                    getattr(x, related_content_object).__str__().lower()))]
+        if object_type == rt:
+            related_content[rt] = _get_related_content_sametype(**kwargs)
+        else:
+            related_content[rt] = _get_related_content_difftype(
+                object_type=object_type, **kwargs)
 
     related_dict = OrderedDict(sorted(related_content.items(),
         key=lambda t: t[0].lower()))
@@ -284,8 +338,7 @@ def get_related_types(object_type):
     related_types = []
     for r in VELCRO_RELATIONSHIPS:
         if object_type in r:
-            related_types.extend([related for related in r
-                if related != object_type])
+            related_types.append(r[1] if r.index(object_type) == 0 else r[0])
     return sorted(related_types)
 
 def get_relationship_class(object_1_type, object_2_type):
