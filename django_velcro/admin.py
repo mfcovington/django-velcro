@@ -4,8 +4,8 @@ from django.contrib import admin
 from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
 
-from .settings import (VELCRO_INLINES_EXTRA, VELCRO_INLINES_TABULAR,
-    VELCRO_METADATA, VELCRO_RELATIONSHIPS)
+from .settings import (VELCRO_INLINES_EXTRA, VELCRO_INLINES_MAX_NUM,
+    VELCRO_INLINES_TABULAR, VELCRO_METADATA, VELCRO_RELATIONSHIPS)
 from .utils import (get_relationship_inlines, plural_object_type,
     singular_object_type)
 
@@ -105,6 +105,7 @@ def generate_inline_model(
         'model': eval('{}{}Relationship'.format(
             *sorted(map(lambda x: x.capitalize(), relationship)))),
         '__module__': __name__,
+        'max_num': VELCRO_INLINES_MAX_NUM,
         'verbose_name': 'Related {}'.format(
             singular_object_type(content_2)).title(),
     }
