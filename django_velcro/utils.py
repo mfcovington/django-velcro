@@ -5,6 +5,7 @@ from importlib import import_module
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 from django.db import models
 
 from .settings import VELCRO_METADATA, VELCRO_METHODS, VELCRO_RELATIONSHIPS
@@ -26,6 +27,7 @@ def _startup():
             model.get_velcro_content = get_related_content
             model.get_velcro_content_sametype = get_related_content_sametype
             model.remove_velcro_content = remove_related_content
+            model.velcro_url = get_url_of_object
 
             for related_type in get_related_types(object_type):
                 def get_velcro_content_for_related_type(
@@ -115,6 +117,16 @@ def _add_or_remove_related_content_sametype(
         return relationship, created
     elif add_or_remove == 'remove':
         relationship_class.objects.get(query).delete()
+
+def _find_dict_in_list(list_, key, value):
+    """
+    Given a list of dicts, a key, and a value, return the dict with the
+    matching key:value pair.
+    """
+    for idx, dict_ in enumerate(list_):
+        if dict_[key] == value:
+            return list_[idx]
+    return []
 
 def _relationship_query(object_1, object_1_type, object_2, object_2_type):
     """
@@ -378,6 +390,23 @@ def get_relationship_inlines(object_type, related_types=None):
             inlines.append(inline_class)
 
     return inlines
+
+def get_url_of_object(object, object_type=None):
+    """
+    Get the reverse URL for an object.
+    If 'object_type' is not defined, the object type of the object will be
+    retrieved.
+    """
+    if object_type is None:
+        object_type = get_object_type(object)
+
+    object_type_metadata = VELCRO_METADATA[object_type]['apps']
+    model_metadata = _find_dict_in_list(
+        object_type_metadata, 'model', object.__class__.__name__)
+    view = model_metadata['view']
+    url_args = model_metadata['url_args']
+    return reverse(
+        view, args=[getattr(object, arg) for arg in url_args])
 
 def has_related_content(object, *related_types, object_type=None):
     """

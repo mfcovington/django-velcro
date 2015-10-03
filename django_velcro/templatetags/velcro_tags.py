@@ -1,18 +1,11 @@
 from django import template
-from django.core.urlresolvers import reverse
 
 from django_velcro.settings import VELCRO_METADATA
 from django_velcro.utils import (get_object_type, get_related_content,
-    has_related_content, plural_object_type)
+    get_url_of_object, has_related_content, plural_object_type)
 
 
 register = template.Library()
-
-def find_dict_in_list(list_, key, value):
-    for idx, dict_ in enumerate(list_):
-        if dict_[key] == value:
-            return list_[idx]
-    return []
 
 @register.assignment_tag
 def get_velcro_related(object, verbose=False):
@@ -31,16 +24,7 @@ def velcro_url(related_object, related_type=None):
     If 'related_type' is not defined, the object type of the related object
     will be retrieved.
     """
-    if related_type is None:
-        related_type = get_object_type(related_object)
-
-    related_type_metadata = VELCRO_METADATA[related_type]['apps']
-    related_model_metadata = find_dict_in_list(
-        related_type_metadata, 'model', related_object.__class__.__name__)
-    view = related_model_metadata['view']
-    url_args = related_model_metadata['url_args']
-    return reverse(
-        view, args=[getattr(related_object, arg) for arg in url_args])
+    return get_url_of_object(object=related_object, object_type=related_type)
 
 @register.inclusion_tag('django_velcro/velcro_link.html')
 def velcro_link(related_object, related_type=None):
