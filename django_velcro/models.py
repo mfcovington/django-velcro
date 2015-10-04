@@ -178,7 +178,7 @@ def generate_relationship_model(relationship):
                     'verbose_name_plural': 'data',
                 },
             },
-            'publications': {
+            'publication': {
                 'apps': [
                     {
                         'app_label': 'publication',
@@ -201,12 +201,12 @@ def generate_relationship_model(relationship):
         }
 
         # models.py
-        generate_relationship_model(('data', 'publications'))
+        generate_relationship_model(('data', 'publication'))
 
 
     Equivalent To:
 
-        class DataPublicationsRelationship(models.Model):
+        class DataPublicationRelationship(models.Model):
 
             data_limit = models.Q(app_label='data', model='data') | \\
                 models.Q(app_label='data', model='dataset')
@@ -217,14 +217,14 @@ def generate_relationship_model(relationship):
             data_content_object = GenericForeignKey(
                 'data_content_type', 'data_object_id')
 
-            publications_limit = models.Q(app_label='publication', model='publication') | \\
+            publication_limit = models.Q(app_label='publication', model='publication') | \\
                 models.Q(app_label='publication', model='publicationset')
-            publications_content_type = models.ForeignKey(ContentType,
-                limit_choices_to=publications_limit,
-                related_name='%(app_label)s_%(class)s_related_publications')
-            publications_object_id = models.PositiveIntegerField()
-            publications_content_object = GenericForeignKey(
-                'publications_content_type', 'publications_object_id')
+            publication_content_type = models.ForeignKey(ContentType,
+                limit_choices_to=publication_limit,
+                related_name='%(app_label)s_%(class)s_related_publication')
+            publication_object_id = models.PositiveIntegerField()
+            publication_content_object = GenericForeignKey(
+                'publication_content_type', 'publication_object_id')
 
             order_by = models.CharField(max_length=255, blank=True)
 
@@ -235,8 +235,8 @@ def generate_relationship_model(relationship):
                 query = {
                     'data_content_type': self.data_content_type,
                     'data_object_id': self.data_object_id,
-                    'publications_content_type': self.publications_content_type,
-                    'publications_object_id': self.publications_object_id,
+                    'publication_content_type': self.publication_content_type,
+                    'publication_object_id': self.publication_object_id,
                 }
 
                 try:
@@ -253,15 +253,15 @@ def generate_relationship_model(relationship):
                 return '{}: {} ⟷  {}: {}'.format(
                     self.data_content_type.name.upper(),
                     self.data_content_object,
-                    self.publications_content_type.name.upper(),
-                    self.publications_content_object
+                    self.publication_content_type.name.upper(),
+                    self.publication_content_object
                 )
 
     When generating relationship models for matching object types, '1' or '2'
     will be appended to field names instead of field names being prefixed by
     their object type. For example, 'content_type_1' and 'content_type_2'
     would be used for matching object types, whereas 'data_content_type'
-    and 'publications_content_type' might be used for differing object types.
+    and 'publication_content_type' might be used for differing object types.
     """
     content_1, content_2 = sorted(relationship)
     klass_name = '{}{}Relationship'.format(content_1.capitalize(),

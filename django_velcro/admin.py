@@ -79,12 +79,12 @@ def import_relationship_model(relationship):
 
     Usage:
 
-        import_relationship_model(('data', 'publications'))
+        import_relationship_model(('data', 'publication'))
 
 
     Equivalent To:
 
-        import DataPublicationsRelationship
+        import DataPublicationRelationship
     """
     content_1, content_2 = sorted(map(lambda x: x.capitalize(), relationship))
     relationship_class_name = '{}{}Relationship'.format(content_1, content_2)
@@ -100,7 +100,7 @@ def generate_inline_model(
 
     Usage:
 
-        generate_inline_model(('data', 'publications'))
+        generate_inline_model(('data', 'publication'))
 
 
     Equivalent To:
@@ -109,8 +109,8 @@ def generate_inline_model(
             model = DataPublicationsRelationship
             ct_field = 'data_content_type'
             ct_fk_field = 'data_object_id'
-            fields = ['publications_content_type', 'publications_object_id']
-            ordering = ['publications_content_type', 'order_by']
+            fields = ['publication_content_type', 'publication_object_id']
+            ordering = ['publication_content_type', 'order_by']
             verbose_name = 'Related Publication'
             verbose_name_plural = 'Related Publications'
     """
@@ -190,13 +190,13 @@ def generate_and_register_admin_model(relationship):
 
     Usage:
 
-        generate_and_register_admin_model(('data', 'publications'))
+        generate_and_register_admin_model(('data', 'publication'))
 
     Equivalent To:
 
-        class DataPublicationsRelationshipAdmin(GenericAdminModelAdmin):
+        class DataPublicationRelationshipAdmin(GenericAdminModelAdmin):
             readonly_fields = ['order_by']
-        admin.site.register(DataPublicationsRelationship, DataPublicationsAdmin)
+        admin.site.register(DataPublicationRelationship, DataPublicationAdmin)
     """
     content_1, content_2 = sorted(map(lambda x: x.capitalize(), relationship))
     klass_name = '{}{}RelationshipAdmin'.format(content_1, content_2)

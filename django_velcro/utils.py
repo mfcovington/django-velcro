@@ -268,9 +268,9 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
     Usage:
         from data.models import Data
         data_set = DataSet.objects.first()
-        get_related_content(data_set)                               # all related types
-        get_related_content(data_set, 'publications')               # one related type
-        get_related_content(data_set, 'publications', 'scientists') # two related types
+        get_related_content(data_set)                              # all related types
+        get_related_content(data_set, 'publication')               # one related type
+        get_related_content(data_set, 'publication', 'scientists') # two related types
     """
     if object_type is None:
         object_type = get_object_type(object)
