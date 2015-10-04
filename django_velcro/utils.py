@@ -292,10 +292,11 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
             'verbose': verbose,
         }
 
+        rt_raw = rt
         if verbose:
             rt = plural_object_type(rt)
 
-        if object_type == rt:
+        if object_type == rt_raw:
             related_content[rt] = _get_related_content_sametype(**kwargs)
         else:
             related_content[rt] = _get_related_content_difftype(
