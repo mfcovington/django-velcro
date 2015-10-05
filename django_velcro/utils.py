@@ -203,7 +203,7 @@ def get_or_validate_related_types(object_type, related_types=None):
 
 def _get_related_content_difftype(
         object, object_type, related_type, content_type, relationship_class,
-        limit, verbose):
+        limit):
     """
     Get related content for a related type that differs from the query object's
     type.
@@ -223,8 +223,7 @@ def _get_related_content_difftype(
     ]
 
 def _get_related_content_sametype(
-        object, related_type, content_type, relationship_class, limit,
-        verbose):
+        object, related_type, content_type, relationship_class, limit):
     """
     Get related content for a related type that matches the query object's
     type.
@@ -289,7 +288,6 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
             'object': object,
             'related_type': rt,
             'relationship_class': relationship_class,
-            'verbose': verbose,
         }
 
         rt_raw = rt
