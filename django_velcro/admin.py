@@ -136,12 +136,12 @@ def generate_inline_model(
             klass_name = '{}To{}RelationshipReverseInline'.format(
                 content_1.capitalize(), content_2.capitalize())
             typedict.update({
-                'ct_field': 'content_type_2'.format(content_2.lower()),
-                'ct_fk_field': 'object_id_2'.format(content_2.lower()),
+                'ct_field': 'content_type_2',
+                'ct_fk_field': 'object_id_2',
                 'extra': 0,
                 'fields': [
-                    'content_type_1'.format(content_1.lower()),
-                    'object_id_1'.format(content_1.lower()),
+                    'content_type_1',
+                    'object_id_1',
                 ],
                 'ordering': [
                     'order_by',
@@ -151,12 +151,12 @@ def generate_inline_model(
             })
         else:
             typedict.update({
-                'ct_field': 'content_type_1'.format(content_1.lower()),
-                'ct_fk_field': 'object_id_1'.format(content_1.lower()),
+                'ct_field': 'content_type_1',
+                'ct_fk_field': 'object_id_1',
                 'extra': VELCRO_INLINES_EXTRA,
                 'fields': [
-                    'content_type_2'.format(content_2.lower()),
-                    'object_id_2'.format(content_2.lower()),
+                    'content_type_2',
+                    'object_id_2',
                 ],
                 'ordering': [
                     'order_by',
