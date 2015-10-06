@@ -67,20 +67,22 @@ def _generate_relationship_model_difftype(relationship, typedict):
 
     object_1_velcro_type, object_2_velcro_type = sorted(relationship)
 
-    for content in map(lambda x: x.lower(), relationship):
+    for velcro_type in map(lambda x: x.lower(), relationship):
         queries = []
-        for lim in VELCRO_METADATA[content]['apps']:
-            queries.append(
-                models.Q(**{k: lim[k].lower() for k in ('app_label', 'model')}))
+        for model_metadata in VELCRO_METADATA[velcro_type]['apps']:
+            queries.append(models.Q(**{
+                k: model_metadata[k].lower() for k in ('app_label', 'model')}))
         limit = reduce(operator.or_, queries, models.Q())
 
         typedict.update({
-            '{}_content_type'.format(content): models.ForeignKey(ContentType,
-                limit_choices_to=limit,
-                related_name='%(app_label)s_%(class)s_related_{}'.format(content)),
-            '{}_object_id'.format(content): models.PositiveIntegerField(),
-            '{}_content_object'.format(content): GenericForeignKey(
-                '{}_content_type'.format(content), '{}_object_id'.format(content)),
+            '{}_content_type'.format(velcro_type): models.ForeignKey(
+                ContentType, limit_choices_to=limit,
+                related_name='%(app_label)s_%(class)s_related_{}'.format(
+                    velcro_type)),
+            '{}_object_id'.format(velcro_type): models.PositiveIntegerField(),
+            '{}_content_object'.format(velcro_type): GenericForeignKey(
+                '{}_content_type'.format(velcro_type),
+                '{}_object_id'.format(velcro_type)),
         })
 
     return RelationshipBase, typedict
@@ -91,9 +93,9 @@ def _generate_relationship_model_sametype(velcro_type):
     types.
     """
     queries = []
-    for lim in VELCRO_METADATA[velcro_type.lower()]['apps']:
-        queries.append(
-            models.Q(**{k: lim[k].lower() for k in ('app_label', 'model')}))
+    for model_metadata in VELCRO_METADATA[velcro_type.lower()]['apps']:
+        queries.append(models.Q(**{
+            k: model_metadata[k].lower() for k in ('app_label', 'model')}))
     limit = reduce(operator.or_, queries, models.Q())
 
     class RelationshipBase(models.Model):
