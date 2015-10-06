@@ -1,8 +1,8 @@
 from django import template
 
 from django_velcro.settings import VELCRO_METADATA
-from django_velcro.utils import (get_object_type, get_related_content,
-    get_url_of_object, has_related_content, plural_object_type)
+from django_velcro.utils import (get_velcro_type, get_related_content,
+    get_url_of_object, has_related_content, plural_velcro_type)
 
 
 register = template.Library()
@@ -21,21 +21,21 @@ def get_velcro_related(object, verbose=False):
 def velcro_url(related_object, related_type=None):
     """
     Template tag to get the reverse URL for a related object.
-    If 'related_type' is not defined, the object type of the related object
+    If 'related_type' is not defined, the velcro type of the related object
     will be retrieved.
     """
-    return get_url_of_object(object=related_object, object_type=related_type)
+    return get_url_of_object(object=related_object, velcro_type=related_type)
 
 @register.inclusion_tag('django_velcro/velcro_link.html')
 def velcro_link(related_object, related_type=None):
     """
     Make a link to a related object. Contains entire '<a href>' tag.
     The text is derived from 'object.__str__()'.
-    If 'related_type' is not defined, the object type of the related object
+    If 'related_type' is not defined, the velcro type of the related object
     will be retrieved.
     """
     if related_type is None:
-        related_type = get_object_type(related_object)
+        related_type = get_velcro_type(related_object)
 
     return {
         'related_object': related_object,
@@ -45,8 +45,8 @@ def velcro_link(related_object, related_type=None):
 @register.filter
 def velcro_plural(value, arg=None):
     """
-    Take an object type and return the plural version of it.
-    If an argument is provided, it is place vefore the pluralized object type.
+    Take a velcro type and return the plural version of it.
+    If an argument is provided, it is place vefore the pluralized velcro type.
     Output is in Title Case.
 
     Returns 'Publications':
@@ -55,7 +55,7 @@ def velcro_plural(value, arg=None):
     Returns 'Related Publications':
         {{ 'publication' | velcro_plural:'related' }}
     """
-    plural = plural_object_type(value)
+    plural = plural_velcro_type(value)
     if arg:
         plural = ' '.join([arg, plural])
 

@@ -18,8 +18,8 @@ def _startup():
     if VELCRO_METHODS == False:
         return
 
-    for object_type, object_type_metadata in VELCRO_METADATA.items():
-        for model_metadata in object_type_metadata['apps']:
+    for velcro_type, velcro_type_metadata in VELCRO_METADATA.items():
+        for model_metadata in velcro_type_metadata['apps']:
             app_name = model_metadata['app_label']
             model_name = model_metadata['model']
             model = apps.get_model(app_name, model_name)
@@ -29,7 +29,7 @@ def _startup():
             model.remove_velcro_content = remove_related_content
             model.velcro_url = get_url_of_object
 
-            for related_type in get_related_types(object_type):
+            for related_type in get_related_types(velcro_type):
                 def get_velcro_content_for_related_type(
                         self, related_type=related_type, **kwargs):
                     if 'grouped' not in kwargs.keys():
@@ -57,17 +57,19 @@ def _startup():
                 )
 
 def _add_or_remove_related_content_difftype(
-        object_1, object_2, object_1_type, object_2_type, add_or_remove):
+        object_1, object_2, object_1_velcro_type, object_2_velcro_type,
+        add_or_remove):
     """
-    Get or create OR remove a relationship between two objects with different
-    object types depending on whether 'add_or_remove' equals 'add' or 'remove'.
+    Add or remove a relationship between two objects with differing velcro
+    types depending on whether 'add_or_remove' equals 'add' or 'remove'.
 
     If adding a relationship, returns the relationship object and a boolean
     indicating whether the relationship was created.
     """
-    relationship_class = get_relationship_class(object_1_type, object_2_type)
+    relationship_class = get_relationship_class(
+        object_1_velcro_type, object_2_velcro_type)
     query = _relationship_query(
-        object_1, object_1_type, object_2, object_2_type)
+        object_1, object_1_velcro_type, object_2, object_2_velcro_type)
 
     if add_or_remove == 'add':
         return relationship_class.objects.get_or_create(**query)
@@ -75,10 +77,11 @@ def _add_or_remove_related_content_difftype(
         relationship_class.objects.get(**query).delete()
 
 def _add_or_remove_related_content_sametype(
-        object_1, object_2, object_1_type, object_2_type, add_or_remove):
+        object_1, object_2, object_1_velcro_type, object_2_velcro_type,
+        add_or_remove):
     """
-    Get or create OR remove a relationship between two objects with matching
-    object types depending on whether 'add_or_remove' equals 'add' or 'remove'.
+    Add or remove a relationship between two objects with matching velcro
+    types depending on whether 'add_or_remove' equals 'add' or 'remove'.
 
     If adding a relationship, returns the relationship object and a boolean
     indicating whether the relationship was created.
@@ -86,7 +89,8 @@ def _add_or_remove_related_content_sametype(
     if object_1 == object_2:
         raise ValueError("{} can't be related to itself.".format(object_1))
 
-    relationship_class = get_relationship_class(object_1_type, object_2_type)
+    relationship_class = get_relationship_class(
+        object_1_velcro_type, object_2_velcro_type)
 
     query = models.Q(
         content_type_1=ContentType.objects.get_for_model(object_1),
@@ -128,17 +132,18 @@ def _find_dict_in_list(list_, key, value):
             return list_[idx]
     return []
 
-def _relationship_query(object_1, object_1_type, object_2, object_2_type):
+def _relationship_query(
+        object_1, object_1_velcro_type, object_2, object_2_velcro_type):
     """
     Return a dict for making relationship object queries.
     """
     return {
-        '{}_content_type'.format(object_1_type):
+        '{}_content_type'.format(object_1_velcro_type):
             ContentType.objects.get_for_model(object_1),
-        '{}_object_id'.format(object_1_type): object_1.id,
-        '{}_content_type'.format(object_2_type):
+        '{}_object_id'.format(object_1_velcro_type): object_1.id,
+        '{}_content_type'.format(object_2_velcro_type):
             ContentType.objects.get_for_model(object_2),
-        '{}_object_id'.format(object_2_type): object_2.id,
+        '{}_object_id'.format(object_2_velcro_type): object_2.id,
     }
 
 def add_related_content(object_1, object_2):
@@ -148,31 +153,31 @@ def add_related_content(object_1, object_2):
     Returns the relationship object and a boolean indicating whether
     the relationship was created.
     """
-    object_1_type = get_object_type(object_1)
-    object_2_type = get_object_type(object_2)
+    object_1_velcro_type = get_velcro_type(object_1)
+    object_2_velcro_type = get_velcro_type(object_2)
 
     kwargs = {
         'add_or_remove': 'add',
         'object_1': object_1,
         'object_2': object_2,
-        'object_1_type': object_1_type,
-        'object_2_type': object_2_type,
+        'object_1_velcro_type': object_1_velcro_type,
+        'object_2_velcro_type': object_2_velcro_type,
     }
 
-    if object_1_type == object_2_type:
+    if object_1_velcro_type == object_2_velcro_type:
         return _add_or_remove_related_content_sametype(**kwargs)
     else:
         return _add_or_remove_related_content_difftype(**kwargs)
 
-def get_all_object_types():
+def get_all_velcro_types():
     """
-    Return a list of all object types defined in 'settings.VELCRO_METADATA'.
+    Return a list of all velcro types defined in 'settings.VELCRO_METADATA'.
     """
     return sorted(list(VELCRO_METADATA.keys()))
 
-def get_object_type(object):
+def get_velcro_type(object):
     """
-    Return the object type for a given object based on Django Velcro metadata.
+    Return the velcro type for a given object based on Django Velcro metadata.
     """
     if inspect.isclass(object):
         object_class = object
@@ -182,35 +187,35 @@ def get_object_type(object):
     app_label = object_class._meta.app_label.lower()
     model = object_class._meta.object_name
 
-    for object_type, type_metadata in sorted(VELCRO_METADATA.items()):
-        for model_metadata in type_metadata['apps']:
+    for velcro_type, velcro_type_metadata in sorted(VELCRO_METADATA.items()):
+        for model_metadata in velcro_type_metadata['apps']:
             if (model_metadata['app_label'] == app_label and
                     model_metadata['model'] == model):
-                return object_type
+                return velcro_type
 
-def get_or_validate_related_types(object_type, related_types=None):
+def get_or_validate_related_types(velcro_type, related_types=None):
     """
-    Given an object type, return all related types.
-    Given an object type and a list of related types, return a list of the
+    Given a velcro type, return all related types.
+    Given a velcro type and a list of related types, return a list of the
     valid related types.
     """
     if related_types:
-        related_types = validate_related_types(object_type, related_types)
+        related_types = validate_related_types(velcro_type, related_types)
     else:
-        related_types = get_related_types(object_type)
+        related_types = get_related_types(velcro_type)
 
     return related_types
 
 def _get_related_content_difftype(
-        object, object_type, related_type, content_type, relationship_class,
+        object, velcro_type, related_type, content_type, relationship_class,
         limit):
     """
     Get related content for a related type that differs from the query object's
     type.
     """
     query = {
-        '{}_object_id'.format(object_type): object.id,
-        '{}_content_type'.format(object_type): content_type,
+        '{}_object_id'.format(velcro_type): object.id,
+        '{}_content_type'.format(velcro_type): content_type,
     }
     relationships = relationship_class.objects.filter(**query)[:limit]
     related_content_object = '{}_content_object'.format(related_type)
@@ -251,8 +256,9 @@ def _get_related_content_sametype(
     return sorted(
         related_content, key=lambda x: (type(x).__name__.lower(), x.__str__()))
 
-def get_related_content(object, *related_types, grouped=True, limit=None,
-    object_type=None, verbose=False):
+def get_related_content(
+        object, *related_types, grouped=True, limit=None, velcro_type=None,
+        verbose=False):
     """
     Return a dictionary of related content (of given related type(s)) for an
     object. Each key is a related type and its value is a list of related
@@ -271,14 +277,14 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
         get_related_content(data_set, 'publication')               # one related type
         get_related_content(data_set, 'publication', 'scientists') # two related types
     """
-    if object_type is None:
-        object_type = get_object_type(object)
+    if velcro_type is None:
+        velcro_type = get_velcro_type(object)
 
-    related_types = get_or_validate_related_types(object_type, related_types)
+    related_types = get_or_validate_related_types(velcro_type, related_types)
     related_content = {}
 
     for rt in related_types:
-        relationship_class = get_relationship_class(object_type, rt)
+        relationship_class = get_relationship_class(velcro_type, rt)
 
         content_type = ContentType.objects.get_for_model(object)
 
@@ -292,13 +298,13 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
 
         rt_raw = rt
         if verbose:
-            rt = plural_object_type(rt)
+            rt = plural_velcro_type(rt)
 
-        if object_type == rt_raw:
+        if velcro_type == rt_raw:
             related_content[rt] = _get_related_content_sametype(**kwargs)
         else:
             related_content[rt] = _get_related_content_difftype(
-                object_type=object_type, **kwargs)
+                velcro_type=velcro_type, **kwargs)
 
     related_dict = OrderedDict(sorted(related_content.items(),
         key=lambda t: t[0].lower()))
@@ -309,12 +315,12 @@ def get_related_content(object, *related_types, grouped=True, limit=None,
         related_list = list(related_dict.values())
         return [item for sublist in related_list for item in sublist]
 
-def get_related_content_sametype(object, *related_types, object_type=None):
+def get_related_content_sametype(object, *related_types, velcro_type=None):
     """
-    Return a list of related content for an object of the same type as that
-    object. This related content of the same type is retrieved indirectly via
-    mutually-related content of all other related types. To limit the results
-    to specific relationships, specify related types of interest.
+    Return a list of related content for an object of the same velcro type as
+    that object. This related content of the same type is retrieved indirectly
+    via mutually-related content of all other related types. To limit the
+    results to specific relationships, specify related types of interest.
 
     Usage:
         from data.models import Data
@@ -323,19 +329,19 @@ def get_related_content_sametype(object, *related_types, object_type=None):
         get_related_content_sametype(data_set, 'scientists') # via one related type
         get_related_content_sametype(data_set, 't1', 't2')   # via two related types
     """
-    if object_type is None:
-        object_type = get_object_type(object)
+    if velcro_type is None:
+        velcro_type = get_velcro_type(object)
 
-    related_types = get_or_validate_related_types(object_type, related_types)
+    related_types = get_or_validate_related_types(velcro_type, related_types)
     related_content_sametype = []
 
-    for related_type, related_objects in get_related_content(object,
-            *related_types, object_type=object_type).items():
+    for related_type, related_objects in get_related_content(
+            object, *related_types, velcro_type=velcro_type).items():
 
         for r in related_objects:
             related_content_sametype.extend(
-                get_related_content(r, object_type,
-                    object_type=related_type)[object_type])
+                get_related_content(
+                    r, velcro_type, velcro_type=related_type)[velcro_type])
 
     related_content_sametype = list(set(related_content_sametype))
 
@@ -345,43 +351,45 @@ def get_related_content_sametype(object, *related_types, object_type=None):
     return sorted(related_content_sametype,
         key=lambda x: (type(x).__name__.lower(), x.__str__().lower()))
 
-def get_related_types(object_type):
+def get_related_types(velcro_type):
     """
-    Given an object type, return all related types.
+    Given a velcro type, return all related types.
     """
     related_types = []
     for r in VELCRO_RELATIONSHIPS:
-        if object_type in r:
-            related_types.append(r[1] if r.index(object_type) == 0 else r[0])
+        if velcro_type in r:
+            related_types.append(r[1] if r.index(velcro_type) == 0 else r[0])
     return sorted(related_types)
 
-def get_relationship_class(object_1_type, object_2_type):
+def get_relationship_class(object_1_velcro_type, object_2_velcro_type):
     """
-    Given two object types, import and return the corresponding relationship
+    Given two velcro types, import and return the corresponding relationship
     class.
     """
     relationship_class_name = "{}{}Relationship".format(
-        *sorted((object_1_type.capitalize(), object_2_type.capitalize())))
+        *sorted((object_1_velcro_type.capitalize(),
+                 object_2_velcro_type.capitalize())))
     return apps.get_model(__package__, relationship_class_name)
 
-def get_relationship_inlines(object_type, related_types=None):
+def get_relationship_inlines(velcro_type, related_types=None):
     """
-    Given an object type and, optionally, a list of related types, import
+    Given a velcro type and, optionally, a list of related types, import
     and return all relevant relationship inline models for an admin model.
     """
-    related_types = get_or_validate_related_types(object_type, related_types)
+    related_types = get_or_validate_related_types(velcro_type, related_types)
     inlines = []
 
     for related in related_types:
-        inline_class_name = '{}To{}RelationshipInline'.format(object_type.capitalize(), related.capitalize())
-        inline_class = getattr(import_module('.admin', package=__package__),
-            inline_class_name)
+        inline_class_name = '{}To{}RelationshipInline'.format(
+            velcro_type.capitalize(), related.capitalize())
+        inline_class = getattr(
+            import_module('.admin', package=__package__), inline_class_name)
         globals()[inline_class_name] = inline_class
         inlines.append(inline_class)
 
-        if object_type == related:
+        if velcro_type == related:
             inline_class_name = '{}To{}RelationshipReverseInline'.format(
-                object_type.capitalize(), related.capitalize())
+                velcro_type.capitalize(), related.capitalize())
             inline_class = getattr(
                 import_module(
                     '.admin', package=__package__), inline_class_name)
@@ -390,29 +398,29 @@ def get_relationship_inlines(object_type, related_types=None):
 
     return inlines
 
-def get_url_of_object(object, object_type=None):
+def get_url_of_object(object, velcro_type=None):
     """
     Get the reverse URL for an object.
-    If 'object_type' is not defined, the object type of the object will be
+    If 'velcro_type' is not defined, the velcro type of the object will be
     retrieved.
     """
-    if object_type is None:
-        object_type = get_object_type(object)
+    if velcro_type is None:
+        velcro_type = get_velcro_type(object)
 
-    object_type_metadata = VELCRO_METADATA[object_type]['apps']
+    velcro_type_metadata = VELCRO_METADATA[velcro_type]['apps']
     model_metadata = _find_dict_in_list(
-        object_type_metadata, 'model', object.__class__.__name__)
+        velcro_type_metadata, 'model', object.__class__.__name__)
     view = model_metadata['view']
     url_args = model_metadata['url_args']
     return reverse(
         view, args=[getattr(object, arg) for arg in url_args])
 
-def has_related_content(object, *related_types, object_type=None):
+def has_related_content(object, *related_types, velcro_type=None):
     """
     Return Boolean True/False depending on whether object has related content.
     """
-    related_content = get_related_content(object, *related_types, limit=1,
-        object_type=object_type)
+    related_content = get_related_content(
+        object, *related_types, limit=1, velcro_type=velcro_type)
 
     has_related = False
 
@@ -423,76 +431,76 @@ def has_related_content(object, *related_types, object_type=None):
 
     return has_related
 
-def is_valid_object_type(object_type):
+def is_valid_velcro_type(velcro_type):
     """
-    Return 'True' if the provided object type is defined in
+    Return 'True' if the provided velcro type is defined in
     'settings.VELCRO_METADATA'.
     """
-    if object_type in VELCRO_METADATA.keys():
+    if velcro_type in VELCRO_METADATA.keys():
         return True
 
 def remove_related_content(object_1, object_2):
     """
     Delete a relationship between two objects.
     """
-    object_1_type = get_object_type(object_1)
-    object_2_type = get_object_type(object_2)
+    object_1_velcro_type = get_velcro_type(object_1)
+    object_2_velcro_type = get_velcro_type(object_2)
 
     kwargs = {
         'add_or_remove': 'remove',
         'object_1': object_1,
         'object_2': object_2,
-        'object_1_type': object_1_type,
-        'object_2_type': object_2_type,
+        'object_1_velcro_type': object_1_velcro_type,
+        'object_2_velcro_type': object_2_velcro_type,
     }
 
-    if object_1_type == object_2_type:
+    if object_1_velcro_type == object_2_velcro_type:
         _add_or_remove_related_content_sametype(**kwargs)
     else:
         _add_or_remove_related_content_difftype(**kwargs)
 
-def plural_object_type(object_type):
+def plural_velcro_type(velcro_type):
     """
-    Take an object type and return the plural version of it.
+    Take a velcro type and return the plural version of it.
     """
-    type_metadata = VELCRO_METADATA[object_type]
+    velcro_type_metadata = VELCRO_METADATA[velcro_type]
     try:
-        plural = type_metadata['options']['verbose_name_plural']
+        plural = velcro_type_metadata['options']['verbose_name_plural']
     except:
-        plural = '{}s'.format(object_type)
+        plural = '{}s'.format(velcro_type)
 
     return(plural)
 
-def singular_object_type(object_type):
+def singular_velcro_type(velcro_type):
     """
-    Take an object type and return the singular version of it.
+    Take a velcro type and return the singular version of it.
     """
-    type_metadata = VELCRO_METADATA[object_type]
+    velcro_type_metadata = VELCRO_METADATA[velcro_type]
     try:
-        singular = type_metadata['options']['verbose_name']
+        singular = velcro_type_metadata['options']['verbose_name']
     except:
-        singular = object_type
+        singular = velcro_type
 
     return(singular)
 
-def validate_related_types(object_type, related_types):
+def validate_related_types(velcro_type, related_types):
     """
-    Given an object type and a list of related types, return a list of the
+    Given a velcro type and a list of related types, return a list of the
     valid related types.
     """
-    all_related_types = get_related_types(object_type)
+    all_related_types = get_related_types(velcro_type)
     valid_related_types = []
     errors = []
 
     for rt in related_types[:]:
-        if not is_valid_object_type(rt):
-            errors.append("'{}' is not a valid object type.".format(rt))
+        if not is_valid_velcro_type(rt):
+            errors.append("'{}' is not a valid velcro type.".format(rt))
         elif rt not in all_related_types:
-            errors.append("'{}' is not a related object type for '{}'.".format(
-                rt, object_type))
+            errors.append("'{}' is not a related velcro type for '{}'.".format(
+                rt, velcro_type))
         elif rt in valid_related_types:
-            errors.append("'{}' is a valid related object type, but occurs " \
-                "multiple times.".format(rt, object_type))
+            errors.append("'{}' is a valid related velcro type, but occurs "
+                          "multiple times.".format(rt, velcro_type))
         else:
             valid_related_types.append(rt)
 

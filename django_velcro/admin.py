@@ -7,8 +7,8 @@ from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
 from .settings import (VELCRO_GENERICADMIN, VELCRO_INLINES,
     VELCRO_INLINES_EXTRA, VELCRO_INLINES_MAX_NUM, VELCRO_INLINES_TABULAR,
     VELCRO_METADATA, VELCRO_RELATIONSHIPS)
-from .utils import (get_relationship_inlines, plural_object_type,
-    singular_object_type)
+from .utils import (get_relationship_inlines, plural_velcro_type,
+    singular_velcro_type)
 
 
 def _startup():
@@ -24,13 +24,13 @@ def _startup():
             generate_inline_model(r, reverse=True)
         generate_and_register_admin_model(r)
 
-    for object_type, object_type_metadata in VELCRO_METADATA.items():
-        for model_metadata in object_type_metadata['apps']:
+    for velcro_type, velcro_type_metadata in VELCRO_METADATA.items():
+        for model_metadata in velcro_type_metadata['apps']:
             app_name = model_metadata['app_label']
             model_name = model_metadata['model']
-            add_velcro_to_third_party_admin(app_name, model_name, object_type)
+            add_velcro_to_third_party_admin(app_name, model_name, velcro_type)
 
-def add_velcro_to_third_party_admin(app_name, model_name, object_type):
+def add_velcro_to_third_party_admin(app_name, model_name, velcro_type):
     """
     Update third party admin models with inline classes for relationships
     and inheritance from 'GenericAdminModelAdmin'.
@@ -56,7 +56,7 @@ def add_velcro_to_third_party_admin(app_name, model_name, object_type):
     orig_inlines = orig_model_admin.inlines
 
     if VELCRO_INLINES:
-        relationship_inlines = get_relationship_inlines(object_type)
+        relationship_inlines = get_relationship_inlines(velcro_type)
         inlines = orig_inlines + relationship_inlines
     else:
         inlines = orig_inlines
@@ -86,8 +86,10 @@ def import_relationship_model(relationship):
 
         import DataPublicationRelationship
     """
-    content_1, content_2 = sorted(map(lambda x: x.capitalize(), relationship))
-    relationship_class_name = '{}{}Relationship'.format(content_1, content_2)
+    object_1_velcro_type, object_2_velcro_type = sorted(
+        map(lambda x: x.capitalize(), relationship))
+    relationship_class_name = '{}{}Relationship'.format(
+        object_1_velcro_type, object_2_velcro_type)
     relationship_class = apps.get_model(__package__, relationship_class_name)
     globals()[relationship_class_name] = relationship_class
 
@@ -114,8 +116,10 @@ def generate_inline_model(
             verbose_name = 'Related Publication'
             verbose_name_plural = 'Related Publications'
     """
-    content_1, content_2 = sorted(relationship, reverse=reverse)
-    klass_name = '{}To{}RelationshipInline'.format(content_1.capitalize(), content_2.capitalize())
+    object_1_velcro_type, object_2_velcro_type = sorted(
+        relationship, reverse=reverse)
+    klass_name = '{}To{}RelationshipInline'.format(
+        object_1_velcro_type.capitalize(), object_2_velcro_type.capitalize())
 
     if tabular:
         inline_style = GenericTabularInline
@@ -128,13 +132,14 @@ def generate_inline_model(
         '__module__': __name__,
         'max_num': VELCRO_INLINES_MAX_NUM,
         'verbose_name': 'Related {}'.format(
-            singular_object_type(content_2)).title(),
+            singular_velcro_type(object_2_velcro_type)).title(),
     }
 
-    if content_1 == content_2:
+    if object_1_velcro_type == object_2_velcro_type:
         if reverse:
             klass_name = '{}To{}RelationshipReverseInline'.format(
-                content_1.capitalize(), content_2.capitalize())
+                object_1_velcro_type.capitalize(),
+                object_2_velcro_type.capitalize())
             typedict.update({
                 'ct_field': 'content_type_2',
                 'ct_fk_field': 'object_id_2',
@@ -147,7 +152,7 @@ def generate_inline_model(
                     'order_by',
                 ],
                 'verbose_name_plural': 'Related {} (Reverse)'.format(
-                    plural_object_type(content_1)).title(),
+                    plural_velcro_type(object_1_velcro_type)).title(),
             })
         else:
             typedict.update({
@@ -162,23 +167,23 @@ def generate_inline_model(
                     'order_by',
                 ],
                 'verbose_name_plural': 'Related {} (Forward)'.format(
-                    plural_object_type(content_2)).title(),
+                    plural_velcro_type(object_2_velcro_type)).title(),
             })
     else:
         typedict.update({
-            'ct_field': '{}_content_type'.format(content_1.lower()),
-            'ct_fk_field': '{}_object_id'.format(content_1.lower()),
+            'ct_field': '{}_content_type'.format(object_1_velcro_type.lower()),
+            'ct_fk_field': '{}_object_id'.format(object_1_velcro_type.lower()),
             'extra': VELCRO_INLINES_EXTRA,
             'fields': [
-                '{}_content_type'.format(content_2.lower()),
-                '{}_object_id'.format(content_2.lower()),
+                '{}_content_type'.format(object_2_velcro_type.lower()),
+                '{}_object_id'.format(object_2_velcro_type.lower()),
             ],
             'ordering': [
-                '{}_content_type'.format(content_2.lower()),
+                '{}_content_type'.format(object_2_velcro_type.lower()),
                 'order_by',
             ],
             'verbose_name_plural': 'Related {}'.format(
-                plural_object_type(content_2)).title(),
+                plural_velcro_type(object_2_velcro_type)).title(),
         })
 
     klass = type(klass_name, (inline_style,), typedict)
@@ -198,8 +203,10 @@ def generate_and_register_admin_model(relationship):
             readonly_fields = ['order_by']
         admin.site.register(DataPublicationRelationship, DataPublicationAdmin)
     """
-    content_1, content_2 = sorted(map(lambda x: x.capitalize(), relationship))
-    klass_name = '{}{}RelationshipAdmin'.format(content_1, content_2)
+    object_1_velcro_type, object_2_velcro_type = sorted(
+        map(lambda x: x.capitalize(), relationship))
+    klass_name = '{}{}RelationshipAdmin'.format(
+        object_1_velcro_type, object_2_velcro_type)
     klass = type(
         klass_name,
         (GenericAdminModelAdmin,),
@@ -210,7 +217,8 @@ def generate_and_register_admin_model(relationship):
     )
     globals()[klass_name] = klass
 
-    model = eval('{}{}Relationship'.format(content_1, content_2))
+    model = eval('{}{}Relationship'.format(
+        object_1_velcro_type, object_2_velcro_type))
     admin.site.register(model, klass)
 
 

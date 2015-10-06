@@ -18,11 +18,11 @@ def _startup():
 def _generate_relationship_model_difftype(relationship, typedict):
     """
     Return RelationshipBase model and updated typedict for relationship models
-    with different object types.
+    with differing velcro types.
     """
     class RelationshipBase(models.Model):
         """
-        Base class for relationship models with different object types.
+        Base class for relationship models with differing velcro types.
         """
         class Meta:
             abstract = True
@@ -30,14 +30,16 @@ def _generate_relationship_model_difftype(relationship, typedict):
 
         def save(self, *args, **kwargs):
             query = {
-                '{}_content_type'.format(content_1):
-                    getattr(self, '{}_content_type'.format(content_1)),
-                '{}_object_id'.format(content_1):
-                    getattr(self, '{}_object_id'.format(content_1)),
-                '{}_content_type'.format(content_2):
-                    getattr(self, '{}_content_type'.format(content_2)),
-                '{}_object_id'.format(content_2):
-                    getattr(self, '{}_object_id'.format(content_2)),
+                '{}_content_type'.format(object_1_velcro_type):
+                    getattr(
+                        self, '{}_content_type'.format(object_1_velcro_type)),
+                '{}_object_id'.format(object_1_velcro_type):
+                    getattr(self, '{}_object_id'.format(object_1_velcro_type)),
+                '{}_content_type'.format(object_2_velcro_type):
+                    getattr(
+                        self, '{}_content_type'.format(object_2_velcro_type)),
+                '{}_object_id'.format(object_2_velcro_type):
+                    getattr(self, '{}_object_id'.format(object_2_velcro_type)),
             }
 
             try:
@@ -52,14 +54,18 @@ def _generate_relationship_model_difftype(relationship, typedict):
 
         def __str__(self):
             return '{}: {} ⟷  {}: {}'.format(
-                getattr(self, '{}_content_type'.format(content_1)).name.upper(),
-                getattr(self, '{}_content_object'.format(content_1)),
-                getattr(self, '{}_content_type'.format(content_2)).name.upper(),
-                getattr(self, '{}_content_object'.format(content_2)),
+                getattr(self, '{}_content_type'.format(
+                    object_1_velcro_type)).name.upper(),
+                getattr(
+                    self, '{}_content_object'.format(object_1_velcro_type)),
+                getattr(self, '{}_content_type'.format(
+                    object_2_velcro_type)).name.upper(),
+                getattr(
+                    self, '{}_content_object'.format(object_2_velcro_type)),
             )
 
 
-    content_1, content_2 = sorted(relationship)
+    object_1_velcro_type, object_2_velcro_type = sorted(relationship)
 
     for content in map(lambda x: x.lower(), relationship):
         queries = []
@@ -79,20 +85,20 @@ def _generate_relationship_model_difftype(relationship, typedict):
 
     return RelationshipBase, typedict
 
-def _generate_relationship_model_sametype(object_type):
+def _generate_relationship_model_sametype(velcro_type):
     """
-    Return RelationshipBase model for relationship models with matching object
+    Return RelationshipBase model for relationship models with matching velcro
     types.
     """
     queries = []
-    for lim in VELCRO_METADATA[object_type.lower()]['apps']:
+    for lim in VELCRO_METADATA[velcro_type.lower()]['apps']:
         queries.append(
             models.Q(**{k: lim[k].lower() for k in ('app_label', 'model')}))
     limit = reduce(operator.or_, queries, models.Q())
 
     class RelationshipBase(models.Model):
         """
-        Base class for relationship models with matching object types.
+        Base class for relationship models with matching velcro types.
         """
         content_type_1 = models.ForeignKey(ContentType,
             limit_choices_to=limit,
@@ -257,22 +263,23 @@ def generate_relationship_model(relationship):
                     self.publication_content_object
                 )
 
-    When generating relationship models for matching object types, '1' or '2'
+    When generating relationship models for matching velcro types, '1' or '2'
     will be appended to field names instead of field names being prefixed by
-    their object type. For example, 'content_type_1' and 'content_type_2'
-    would be used for matching object types, whereas 'data_content_type'
-    and 'publication_content_type' might be used for differing object types.
+    their velcro type. For example, 'content_type_1' and 'content_type_2'
+    would be used for matching velcro types, whereas 'data_content_type'
+    and 'publication_content_type' might be used for differing velcro types.
     """
-    content_1, content_2 = sorted(relationship)
-    klass_name = '{}{}Relationship'.format(content_1.capitalize(),
-        content_2.capitalize())
+    object_1_velcro_type, object_2_velcro_type = sorted(relationship)
+    klass_name = '{}{}Relationship'.format(object_1_velcro_type.capitalize(),
+        object_2_velcro_type.capitalize())
     typedict = {
         '__module__': __name__,
         'order_by': models.CharField(max_length=255, blank=True)
     }
 
-    if content_1 == content_2:
-        RelationshipBase = _generate_relationship_model_sametype(content_1)
+    if object_1_velcro_type == object_2_velcro_type:
+        RelationshipBase = _generate_relationship_model_sametype(
+            object_1_velcro_type)
     else:
         RelationshipBase, typedict = _generate_relationship_model_difftype(
             relationship, typedict)
