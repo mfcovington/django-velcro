@@ -184,7 +184,7 @@ def get_velcro_type(object):
     else:
         object_class = object.__class__
 
-    app_label = object_class._meta.app_label.lower()
+    app_label = object_class._meta.app_label
     model = object_class._meta.object_name
 
     for velcro_type, velcro_type_metadata in sorted(VELCRO_METADATA.items()):

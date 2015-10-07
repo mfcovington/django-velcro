@@ -67,7 +67,7 @@ def _generate_relationship_model_difftype(relationship, typedict):
 
     object_1_velcro_type, object_2_velcro_type = sorted(relationship)
 
-    for velcro_type in map(lambda x: x.lower(), relationship):
+    for velcro_type in relationship:
         queries = []
         for model_metadata in VELCRO_METADATA[velcro_type]['apps']:
             queries.append(models.Q(**{
@@ -93,7 +93,7 @@ def _generate_relationship_model_sametype(velcro_type):
     types.
     """
     queries = []
-    for model_metadata in VELCRO_METADATA[velcro_type.lower()]['apps']:
+    for model_metadata in VELCRO_METADATA[velcro_type]['apps']:
         queries.append(models.Q(**{
             k: model_metadata[k].lower() for k in ('app_label', 'model')}))
     limit = reduce(operator.or_, queries, models.Q())

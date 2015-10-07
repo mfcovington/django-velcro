@@ -86,10 +86,9 @@ def import_relationship_model(relationship):
 
         import DataPublicationRelationship
     """
-    object_1_velcro_type, object_2_velcro_type = sorted(
-        map(lambda x: x.capitalize(), relationship))
+    object_1_velcro_type, object_2_velcro_type = sorted(relationship)
     relationship_class_name = '{}{}Relationship'.format(
-        object_1_velcro_type, object_2_velcro_type)
+        object_1_velcro_type.capitalize(), object_2_velcro_type.capitalize())
     relationship_class = apps.get_model(__package__, relationship_class_name)
     globals()[relationship_class_name] = relationship_class
 
@@ -171,15 +170,15 @@ def generate_inline_model(
             })
     else:
         typedict.update({
-            'ct_field': '{}_content_type'.format(object_1_velcro_type.lower()),
-            'ct_fk_field': '{}_object_id'.format(object_1_velcro_type.lower()),
+            'ct_field': '{}_content_type'.format(object_1_velcro_type),
+            'ct_fk_field': '{}_object_id'.format(object_1_velcro_type),
             'extra': VELCRO_INLINES_EXTRA,
             'fields': [
-                '{}_content_type'.format(object_2_velcro_type.lower()),
-                '{}_object_id'.format(object_2_velcro_type.lower()),
+                '{}_content_type'.format(object_2_velcro_type),
+                '{}_object_id'.format(object_2_velcro_type),
             ],
             'ordering': [
-                '{}_content_type'.format(object_2_velcro_type.lower()),
+                '{}_content_type'.format(object_2_velcro_type),
                 'order_by',
             ],
             'verbose_name_plural': 'Related {}'.format(
@@ -203,10 +202,10 @@ def generate_and_register_admin_model(relationship):
             readonly_fields = ['order_by']
         admin.site.register(DataPublicationRelationship, DataPublicationAdmin)
     """
-    object_1_velcro_type, object_2_velcro_type = sorted(
-        map(lambda x: x.capitalize(), relationship))
-    klass_name = '{}{}RelationshipAdmin'.format(
-        object_1_velcro_type, object_2_velcro_type)
+    object_1_velcro_type, object_2_velcro_type = sorted(relationship)
+    model_name = '{}{}Relationship'.format(
+        object_1_velcro_type.capitalize(), object_2_velcro_type.capitalize())
+    klass_name = '{}Admin'.format(model_name)
     klass = type(
         klass_name,
         (GenericAdminModelAdmin,),
@@ -217,8 +216,7 @@ def generate_and_register_admin_model(relationship):
     )
     globals()[klass_name] = klass
 
-    model = eval('{}{}Relationship'.format(
-        object_1_velcro_type, object_2_velcro_type))
+    model = eval(model_name)
     admin.site.register(model, klass)
 
 
