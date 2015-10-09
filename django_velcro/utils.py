@@ -184,13 +184,13 @@ def get_velcro_type(object):
     else:
         object_class = object.__class__
 
-    app_label = object_class._meta.app_label
-    model = object_class._meta.object_name
+    app_name = object_class._meta.app_label
+    model_name = object_class._meta.object_name
 
     for velcro_type, velcro_type_metadata in sorted(VELCRO_METADATA.items()):
         for model_metadata in velcro_type_metadata['apps']:
-            if (model_metadata['app_label'] == app_label and
-                    model_metadata['model'] == model):
+            if (model_metadata['app_label'] == app_name and
+                    model_metadata['model'] == model_name):
                 return velcro_type
 
 def get_or_validate_related_types(velcro_type, related_types=None):
