@@ -228,7 +228,7 @@ def _get_related_content_difftype(
     ]
 
 def _get_related_content_sametype(
-        object, related_type, content_type, relationship_class, limit):
+        object, content_type, relationship_class, limit):
     """
     Get related content for a related type that matches the query object's
     type.
@@ -292,7 +292,6 @@ def get_related_content(
             'content_type': content_type,
             'limit': limit,
             'object': object,
-            'related_type': rt,
             'relationship_class': relationship_class,
         }
 
@@ -304,7 +303,7 @@ def get_related_content(
             related_content[rt] = _get_related_content_sametype(**kwargs)
         else:
             related_content[rt] = _get_related_content_difftype(
-                velcro_type=velcro_type, **kwargs)
+                velcro_type=velcro_type, related_type=rt_raw, **kwargs)
 
     related_dict = OrderedDict(sorted(related_content.items(),
         key=lambda t: t[0].lower()))
