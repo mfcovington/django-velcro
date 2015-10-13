@@ -94,14 +94,14 @@ def _add_or_remove_related_content_sametype(
 
     query = models.Q(
         content_type_1=ContentType.objects.get_for_model(object_1),
-        object_id_1=object_1.id,
+        object_pk_1=object_1.pk,
         content_type_2=ContentType.objects.get_for_model(object_2),
-        object_id_2=object_2.id,
+        object_pk_2=object_2.pk,
     ) | models.Q(
         content_type_1=ContentType.objects.get_for_model(object_2),
-        object_id_1=object_2.id,
+        object_pk_1=object_2.pk,
         content_type_2=ContentType.objects.get_for_model(object_1),
-        object_id_2=object_1.id,
+        object_pk_2=object_1.pk,
     )
 
     if add_or_remove == 'add':
@@ -111,9 +111,9 @@ def _add_or_remove_related_content_sametype(
         except:
             params = {
                 'content_type_1': ContentType.objects.get_for_model(object_1),
-                'object_id_1': object_1.id,
+                'object_pk_1': object_1.pk,
                 'content_type_2': ContentType.objects.get_for_model(object_2),
-                'object_id_2': object_2.id,
+                'object_pk_2': object_2.pk,
             }
             relationship = relationship_class.objects.create(**params)
             created = True
@@ -140,10 +140,10 @@ def _relationship_query(
     return {
         '{}_content_type'.format(object_1_velcro_type):
             ContentType.objects.get_for_model(object_1),
-        '{}_object_id'.format(object_1_velcro_type): object_1.id,
+        '{}_object_pk'.format(object_1_velcro_type): object_1.pk,
         '{}_content_type'.format(object_2_velcro_type):
             ContentType.objects.get_for_model(object_2),
-        '{}_object_id'.format(object_2_velcro_type): object_2.id,
+        '{}_object_pk'.format(object_2_velcro_type): object_2.pk,
     }
 
 def add_related_content(object_1, object_2):
@@ -214,7 +214,7 @@ def _get_related_content_difftype(
     type.
     """
     query = {
-        '{}_object_id'.format(velcro_type): object.id,
+        '{}_object_pk'.format(velcro_type): object.pk,
         '{}_content_type'.format(velcro_type): content_type,
     }
     relationships = relationship_class.objects.filter(**query)[:limit]
@@ -235,10 +235,10 @@ def _get_related_content_sametype(
     """
     query = models.Q(
         content_type_1=content_type,
-        object_id_1=object.id,
+        object_pk_1=object.pk,
     ) | models.Q(
         content_type_2=content_type,
-        object_id_2=object.id,
+        object_pk_2=object.pk,
     )
 
     related_content = []

@@ -109,8 +109,8 @@ def generate_inline_model(
         class DataToPublicationsRelationshipInline(GenericTabularInline):
             model = DataPublicationsRelationship
             ct_field = 'data_content_type'
-            ct_fk_field = 'data_object_id'
-            fields = ['publication_content_type', 'publication_object_id']
+            ct_fk_field = 'data_object_pk'
+            fields = ['publication_content_type', 'publication_object_pk']
             ordering = ['publication_content_type', 'order_by']
             verbose_name = 'Related Publication'
             verbose_name_plural = 'Related Publications'
@@ -141,11 +141,11 @@ def generate_inline_model(
                 object_2_velcro_type.capitalize())
             typedict.update({
                 'ct_field': 'content_type_2',
-                'ct_fk_field': 'object_id_2',
+                'ct_fk_field': 'object_pk_2',
                 'extra': 0,
                 'fields': [
                     'content_type_1',
-                    'object_id_1',
+                    'object_pk_1',
                 ],
                 'ordering': [
                     'order_by',
@@ -156,11 +156,11 @@ def generate_inline_model(
         else:
             typedict.update({
                 'ct_field': 'content_type_1',
-                'ct_fk_field': 'object_id_1',
+                'ct_fk_field': 'object_pk_1',
                 'extra': VELCRO_INLINES_EXTRA,
                 'fields': [
                     'content_type_2',
-                    'object_id_2',
+                    'object_pk_2',
                 ],
                 'ordering': [
                     'order_by',
@@ -171,11 +171,11 @@ def generate_inline_model(
     else:
         typedict.update({
             'ct_field': '{}_content_type'.format(object_1_velcro_type),
-            'ct_fk_field': '{}_object_id'.format(object_1_velcro_type),
+            'ct_fk_field': '{}_object_pk'.format(object_1_velcro_type),
             'extra': VELCRO_INLINES_EXTRA,
             'fields': [
                 '{}_content_type'.format(object_2_velcro_type),
-                '{}_object_id'.format(object_2_velcro_type),
+                '{}_object_pk'.format(object_2_velcro_type),
             ],
             'ordering': [
                 '{}_content_type'.format(object_2_velcro_type),

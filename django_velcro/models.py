@@ -33,13 +33,13 @@ def _generate_relationship_model_difftype(relationship, typedict):
                 '{}_content_type'.format(object_1_velcro_type):
                     getattr(
                         self, '{}_content_type'.format(object_1_velcro_type)),
-                '{}_object_id'.format(object_1_velcro_type):
-                    getattr(self, '{}_object_id'.format(object_1_velcro_type)),
+                '{}_object_pk'.format(object_1_velcro_type):
+                    getattr(self, '{}_object_pk'.format(object_1_velcro_type)),
                 '{}_content_type'.format(object_2_velcro_type):
                     getattr(
                         self, '{}_content_type'.format(object_2_velcro_type)),
-                '{}_object_id'.format(object_2_velcro_type):
-                    getattr(self, '{}_object_id'.format(object_2_velcro_type)),
+                '{}_object_pk'.format(object_2_velcro_type):
+                    getattr(self, '{}_object_pk'.format(object_2_velcro_type)),
             }
 
             try:
@@ -79,10 +79,10 @@ def _generate_relationship_model_difftype(relationship, typedict):
                 ContentType, limit_choices_to=limit,
                 related_name='%(app_label)s_%(class)s_related_{}'.format(
                     velcro_type)),
-            '{}_object_id'.format(velcro_type): models.PositiveIntegerField(),
+            '{}_object_pk'.format(velcro_type): models.PositiveIntegerField(),
             '{}_content_object'.format(velcro_type): GenericForeignKey(
                 '{}_content_type'.format(velcro_type),
-                '{}_object_id'.format(velcro_type)),
+                '{}_object_pk'.format(velcro_type)),
         })
 
     return RelationshipBase, typedict
@@ -105,16 +105,16 @@ def _generate_relationship_model_sametype(velcro_type):
         content_type_1 = models.ForeignKey(ContentType,
             limit_choices_to=limit,
             related_name='%(app_label)s_%(class)s_related_1')
-        object_id_1 = models.PositiveIntegerField()
+        object_pk_1 = models.PositiveIntegerField()
         content_object_1 = GenericForeignKey(
-            'content_type_1', 'object_id_1')
+            'content_type_1', 'object_pk_1')
 
         content_type_2 = models.ForeignKey(ContentType,
             limit_choices_to=limit,
             related_name='%(app_label)s_%(class)s_related_2')
-        object_id_2 = models.PositiveIntegerField()
+        object_pk_2 = models.PositiveIntegerField()
         content_object_2 = GenericForeignKey(
-            'content_type_2', 'object_id_2')
+            'content_type_2', 'object_pk_2')
 
         class Meta:
             abstract = True
@@ -123,14 +123,14 @@ def _generate_relationship_model_sametype(velcro_type):
         def save(self, *args, **kwargs):
             query = models.Q(
                 content_type_1=self.content_type_1,
-                object_id_1=self.object_id_1,
+                object_pk_1=self.object_pk_1,
                 content_type_2=self.content_type_2,
-                object_id_2=self.object_id_2,
+                object_pk_2=self.object_pk_2,
             ) | models.Q(
                 content_type_1=self.content_type_2,
-                object_id_1=self.object_id_2,
+                object_pk_1=self.object_pk_2,
                 content_type_2=self.content_type_1,
-                object_id_2=self.object_id_1,
+                object_pk_2=self.object_pk_1,
             )
 
             try:
@@ -142,7 +142,7 @@ def _generate_relationship_model_sametype(velcro_type):
             self.order_by = self.__str__()
 
             if (self.content_type_1 == self.content_type_2 and
-                    self.object_id_1 == self.object_id_2):
+                    self.object_pk_1 == self.object_pk_2):
                 print("Object can't be related to itself.")
             else:
                 super().save(*args, **kwargs)
@@ -221,18 +221,18 @@ def generate_relationship_model(relationship):
             data_content_type = models.ForeignKey(ContentType,
                 limit_choices_to=data_limit,
                 related_name='%(app_label)s_%(class)s_related_data')
-            data_object_id = models.PositiveIntegerField()
+            data_object_pk = models.PositiveIntegerField()
             data_content_object = GenericForeignKey(
-                'data_content_type', 'data_object_id')
+                'data_content_type', 'data_object_pk')
 
             publication_limit = models.Q(app_label='publication', model='publication') | \\
                 models.Q(app_label='publication', model='publicationset')
             publication_content_type = models.ForeignKey(ContentType,
                 limit_choices_to=publication_limit,
                 related_name='%(app_label)s_%(class)s_related_publication')
-            publication_object_id = models.PositiveIntegerField()
+            publication_object_pk = models.PositiveIntegerField()
             publication_content_object = GenericForeignKey(
-                'publication_content_type', 'publication_object_id')
+                'publication_content_type', 'publication_object_pk')
 
             order_by = models.CharField(max_length=255, blank=True)
 
@@ -242,9 +242,9 @@ def generate_relationship_model(relationship):
             def save(self, *args, **kwargs):
                 query = {
                     'data_content_type': self.data_content_type,
-                    'data_object_id': self.data_object_id,
+                    'data_object_pk': self.data_object_pk,
                     'publication_content_type': self.publication_content_type,
-                    'publication_object_id': self.publication_object_id,
+                    'publication_object_pk': self.publication_object_pk,
                 }
 
                 try:
