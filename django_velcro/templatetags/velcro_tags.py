@@ -8,14 +8,14 @@ from django_velcro.utils import (get_velcro_type, get_related_content,
 register = template.Library()
 
 @register.assignment_tag
-def get_velcro_related(object, verbose=False):
+def get_velcro_related(obj, verbose=False):
     """
     Get related content and assign it to a variable.
 
     Example:
         {% get_velcro_related object as related_content %}
     """
-    return get_related_content(object, verbose=verbose)
+    return get_related_content(obj, verbose=verbose)
 
 @register.simple_tag
 def velcro_url(related_object, related_type=None):
@@ -24,13 +24,13 @@ def velcro_url(related_object, related_type=None):
     If 'related_type' is not defined, the velcro type of the related object
     will be retrieved.
     """
-    return get_url_of_object(object=related_object, velcro_type=related_type)
+    return get_url_of_object(obj=related_object, velcro_type=related_type)
 
 @register.inclusion_tag('django_velcro/velcro_link.html')
 def velcro_link(related_object, related_type=None):
     """
     Make a link to a related object. Contains entire '<a href>' tag.
-    The text is derived from 'object.__str__()'.
+    The text is derived from 'related_object.__str__()'.
     If 'related_type' is not defined, the velcro type of the related object
     will be retrieved.
     """
@@ -62,7 +62,7 @@ def velcro_plural(value, arg=None):
     return plural.title()
 
 @register.inclusion_tag('django_velcro/related_content.html')
-def velcro_related(object, label=None, label_tag='h3', prefix=None):
+def velcro_related(obj, label=None, label_tag='h3', prefix=None):
     """
     Template tag to list related content organized by related type.
 
@@ -73,10 +73,10 @@ def velcro_related(object, label=None, label_tag='h3', prefix=None):
     (e.g., 'Related').
 
     Basic usage example:
-        {% velcro_related object %}
+        {% velcro_related obj %}
 
     Custom label example:
-        {% velcro_related object label='Related Junk' label_tag='h1' prefix='Related' %}
+        {% velcro_related obj label='Related Junk' label_tag='h1' prefix='Related' %}
 
     The resulting list of related content can be styled with CSS using the
     following classes:
@@ -85,8 +85,8 @@ def velcro_related(object, label=None, label_tag='h3', prefix=None):
       - .related-object
     """
     return {
-        'has_related_content': has_related_content(object),
-        'related_content': get_related_content(object),
+        'has_related_content': has_related_content(obj),
+        'related_content': get_related_content(obj),
         'related_content_label': label,
         'related_content_label_tag': label_tag,
         'related_content_prefix': prefix,
