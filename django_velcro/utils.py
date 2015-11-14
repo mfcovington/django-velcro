@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models
 
-from .settings import VELCRO_METADATA, VELCRO_METHODS, VELCRO_RELATIONSHIPS
+from .app_settings import VELCRO_METADATA, VELCRO_METHODS, VELCRO_RELATIONSHIPS
 
 
 def _startup():

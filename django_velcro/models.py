@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
-from .settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS
+from .app_settings import VELCRO_METADATA, VELCRO_RELATIONSHIPS
 
 
 def _startup():

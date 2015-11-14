@@ -4,7 +4,7 @@ from django.contrib import admin
 from genericadmin.admin import (GenericAdminModelAdmin, GenericStackedInline,
     GenericTabularInline)
 
-from .settings import (VELCRO_GENERICADMIN, VELCRO_INLINES,
+from .app_settings import (VELCRO_GENERICADMIN, VELCRO_INLINES,
     VELCRO_INLINES_EXTRA, VELCRO_INLINES_MAX_NUM, VELCRO_INLINES_TABULAR,
     VELCRO_METADATA, VELCRO_RELATIONSHIPS)
 from .utils import (get_relationship_inlines, plural_velcro_type,
